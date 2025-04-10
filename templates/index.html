@@ -1,1 +1,139 @@
-<!DOCTYPE html><html><body><h1>Index Page</h1></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="google-site-verification" content="OFEyIor584wSjvjQsBD29rrzAg85as7CzNUz5TcAiVI" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anonymous Email by Phantom</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0e0e0e;
+      color: #f2f2f2;
+    }
+    header {
+      background-color: #111111;
+      text-align: center;
+      padding: 2rem 0;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #00ffff;
+    }
+    .main-section {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 3rem;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+    .left-box, .form-box {
+      flex: 0 0 48%;
+      background-color: #1a1a1a;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 8px rgba(0,255,255,0.2);
+      box-sizing: border-box;
+    }
+    .left-box ul {
+      list-style: none;
+      padding-left: 0;
+      line-height: 2.2rem;
+    }
+    .left-box li::before { content: "🟢 "; }
+    .form-box form {
+      max-width: 100%;
+    }
+    .form-box input,
+    .form-box textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 6px;
+      background-color: #333;
+      color: #ffffff;
+      box-sizing: border-box;
+    }
+    .form-box button {
+      width: 100%;
+      background-color: #00cc99;
+      color: #000000;
+      padding: 14px;
+      font-weight: bold;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .form-box button:hover {
+      background-color: #00e6b8;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.9rem;
+      color: #999999;
+    }
+    footer a {
+      color: #00ffff;
+      text-decoration: none;
+      margin: 0 10px;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .main-section {
+        flex-direction: column;
+        padding: 1.5rem;
+      }
+      .left-box, .form-box {
+        flex: 1 1 100%;
+        margin-bottom: 2rem;
+      }
+    }
+</style>
+</head>
+<body>
+  <header>
+    <img src="/static/phantom_logo.png" alt="" style="height: 40px; vertical-align: middle; margin-right: 12px;">
+    Anonymous Email by Phantom
+  </header>
+
+  <section class="main-section">
+    <div class="left-box">
+      <h2>Why Use Phantom?</h2>
+      <ul>
+        <li>No accounts or signups required</li>
+        <li>No IP logging or fingerprinting</li>
+        <li>Emails and files are auto-deleted in 36 hours</li>
+        <li>Supports sender spoofing (fictitious identity)</li>
+        <li>All messages encrypted during transit and rest</li>
+        <li>Built for total anonymity — no questions asked</li>
+      </ul>
+    </div>
+
+    <div class="form-box">
+      <form action="/create-checkout-session" enctype="multipart/form-data" method="post">
+        <input name="from_name" placeholder="Fictitious Name" required type="text"/>
+        <input name="from_email" placeholder="Fictitious Email" required type="email"/>
+        <input name="to_email" placeholder="Recipient Email" required type="email"/>
+        <textarea name="message" placeholder="Your message..." required rows="6"></textarea>
+        <input name="file1" type="file"/>
+        <input name="file2" type="file"/>
+        <button type="submit">
+          <span style="font-weight: bold;">Pay $3.00 USD & Send</span>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+  © 2025 Phantom Mailer. Engineered for true digital privacy.<br><br>
+  <a href="/terms.html">Terms of Use</a> |
+  <a href="/privacy.html">Privacy</a> |
+  <a href="/about.html">About</a>
+</footer>
+</body>
+</html>

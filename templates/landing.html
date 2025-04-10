@@ -1,1 +1,181 @@
-<!DOCTYPE html><html><body><h1>Landing Page</h1></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Phantom - Send Anonymous Email Instantly</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0e0e0e;
+      color: #f2f2f2;
+    }
+    header {
+      background-color: #111111;
+      text-align: center;
+      padding: 2rem 0;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #00ffff;
+    }
+    .main-section {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 3rem;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+    .left, .right {
+      flex: 1 1 45%;
+      background-color: #1a1a1a;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 8px rgba(0,255,255,0.2);
+    }
+    .left ul {
+      list-style: none;
+      padding-left: 0;
+      line-height: 2.4rem;
+    }
+    .left li::before {
+      content: "🟢 ";
+    }
+    .cta {
+      display: block;
+      width: 100%;
+      background-color: #00cc99;
+      color: #000;
+      font-weight: bold;
+      font-size: 16px;
+      text-align: center;
+      padding: 1rem;
+      border: none;
+      border-radius: 6px;
+      margin-top: 2rem;
+      text-decoration: none;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.9rem;
+      color: #999999;
+    }
+    footer a {
+      color: #00ffff;
+      text-decoration: none;
+      margin: 0 10px;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .main-section {
+        flex-direction: column;
+        padding: 1.5rem;
+      }
+      .left, .right {
+        flex: 1 1 100%;
+        margin-bottom: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>Anonymous Email with Phantom</header>
+
+  <section class="main-section">
+    <div class="left">
+      <h2 id="why-title">Why Use Phantom?</h2>
+      <ul id="feature-list">
+        <li>No signup or account needed</li>
+        <li>No IP tracking or fingerprinting</li>
+        <li>Auto-deletes after 36 hours</li>
+        <li>Supports spoofed sender email</li>
+        <li>Encrypted messages and attachments</li>
+        <li>Perfect for privacy, research, whistleblowers</li>
+      </ul>
+    </div>
+
+    <div class="right">
+      <h2>Ready to Send?</h2>
+      <p>Click below to start sending anonymous messages instantly.</p>
+      <a href="/" class="cta">Start Anonymous Email Now</a>
+    </div>
+  </section>
+
+  <footer>
+  © 2025 Phantom Mailer. Engineered for true digital privacy.<br><br>
+  <a href="/terms.html">Terms of Use</a> |
+  <a href="/privacy.html">Privacy</a> |
+  <a href="/about.html">About</a>
+</footer>
+
+  <script>
+    const lang = navigator.language.slice(0, 2);
+    const features = {
+      en: [
+        "No signup or account needed",
+        "No IP tracking or fingerprinting",
+        "Auto-deletes after 36 hours",
+        "Supports spoofed sender email",
+        "Encrypted messages and attachments",
+        "Perfect for privacy, research, whistleblowers"
+      ],
+      es: [
+        "No se requiere registro ni cuenta",
+        "Sin seguimiento de IP ni huella digital",
+        "Elimina automáticamente después de 36 horas",
+        "Soporta correo electrónico falso del remitente",
+        "Mensajes y archivos cifrados",
+        "Perfecto para privacidad, investigación, denunciantes"
+      ],
+      hi: [
+        "कोई साइनअप या खाता आवश्यक नहीं",
+        "आईपी ट्रैकिंग या फिंगरप्रिंटिंग नहीं",
+        "36 घंटे बाद स्वतः हटाया जाता है",
+        "स्पूफ प्रेषक ईमेल का समर्थन करता है",
+        "संदेश और अटैचमेंट एन्क्रिप्टेड हैं",
+        "गोपनीयता, शोध, व्हिसलब्लोअर्स के लिए उपयुक्त"
+      ],
+      zh: [
+        "无需注册或账户",
+        "无IP追踪或指纹识别",
+        "36小时后自动删除",
+        "支持伪造发件人电子邮件",
+        "加密的消息和附件",
+        "适合隐私、研究、举报者使用"
+      ],
+      ar: [
+        "لا حاجة للتسجيل أو الحساب",
+        "لا تتبع IP أو بصمة",
+        "يتم الحذف تلقائيًا بعد 36 ساعة",
+        "يدعم بريد المرسل المزيف",
+        "الرسائل والمرفقات مشفرة",
+        "مثالي للخصوصية والبحث والمبلغين"
+      ],
+      fr: [
+        "Aucune inscription ou compte requis",
+        "Pas de suivi IP ni d'empreinte numérique",
+        "Suppression automatique après 36 heures",
+        "Prise en charge de l'email expéditeur falsifié",
+        "Messages et pièces jointes chiffrés",
+        "Parfait pour la confidentialité, la recherche, les lanceurs d'alerte"
+      ],
+      de: [
+        "Keine Anmeldung oder Konto erforderlich",
+        "Keine IP-Verfolgung oder Fingerprinting",
+        "Automatisches Löschen nach 36 Stunden",
+        "Unterstützt gefälschte Absender-E-Mails",
+        "Verschlüsselte Nachrichten und Anhänge",
+        "Ideal für Privatsphäre, Forschung, Whistleblower"
+      ]
+    };
+
+    if (features[lang]) {
+      document.querySelector("#feature-list").innerHTML = features[lang]
+        .map(item => `<li>${item}</li>`)
+        .join("");
+    }
+  </script>
+</body>
+</html>
