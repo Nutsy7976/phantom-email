@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: phantom-email
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn phantom:app
+    plan: free
