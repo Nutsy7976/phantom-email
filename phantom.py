@@ -25,22 +25,6 @@ def landing():
 
 @app.route("/create-checkout-session", methods=["POST"])
 def create_checkout_session():
-    # --- Bypass check ---
-    bypass_keyword = os.getenv("OWNER_BYPASS_KEYWORD", "phantombypass")
-    if request.form.get("from_name", "").strip() == bypass_keyword:
-        from_name = request.form.get("from_name", "Anonymous")
-        sender = request.form.get("from_email")
-        recipient = request.form.get("to_email")
-        message = request.form.get("message")
-        attachments = []
-        for file_key in ["file1", "file2"]:
-            f = request.files.get(file_key)
-            if f and f.filename:
-                fname = secure_filename(f.filename)
-                f.save(os.path.join(app.config["UPLOAD_FOLDER"], fname))
-                attachments.append(fname)
-        send_email(from_name, sender, recipient, message, attachments)
-        return redirect("/thankyou")
     data = request.form
     name = data.get("from_name")
     sender = data.get("from_email")
