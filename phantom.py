@@ -1,4 +1,3 @@
-
 from flask import Flask, request, redirect, render_template, jsonify, abort
 import os
 import stripe
@@ -29,6 +28,38 @@ def landing():
 def thankyou():
     return render_template("thankyou.html")
 
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        name = request.form.get("name")
+        contact_method = request.form.get("contact_method")
+        purpose = request.form.get("purpose")
+
+        email_user = os.getenv("SMTP_USERNAME")
+        email_pass = os.getenv("SMTP_PASS")
+        smtp_host = os.getenv("SMTP_HOST")
+        smtp_port = int(os.getenv("SMTP_PORT", "465"))
+        from_address = os.getenv("From_Email")
+        to_address = from_address
+
+        msg = EmailMessage()
+        msg["Subject"] = "Contact Publisher Form Submission"
+        msg["From"] = from_address
+        msg["To"] = to_address
+        msg.set_content(f"Name: {name}
+Contact: {contact_method}
+Purpose: {purpose}")
+
+        try:
+            with smtplib.SMTP_SSL(smtp_host, smtp_port) as server:
+                server.login(email_user, email_pass)
+                server.send_message(msg)
+                print("Contact form email sent.")
+        except Exception as e:
+            print(f"SMTP error (contact form): {e}")
+        return render_template("thankyou.html")
+    return render_template("contact.html")
+
 @app.route("/create-checkout-session", methods=["POST"])
 def create_checkout_session():
     data = request.form
@@ -36,7 +67,6 @@ def create_checkout_session():
     sender = data.get("from_email")
     recipient = data.get("to_email")
     message = data.get("message")
-
     files = [request.files.get("file1"), request.files.get("file2")]
     saved_files_info = []
 
@@ -75,7 +105,6 @@ def create_checkout_session():
         )
         return redirect(session.url, code=303)
     except Exception as e:
-        app.logger.error(f"Stripe session creation failed: {e}")
         return f"Error: {str(e)}", 500
 
 @app.route("/webhook", methods=["POST"])
@@ -84,15 +113,12 @@ def webhook():
     sig_header = request.headers.get('Stripe-Signature')
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
-        app.logger.info("✅ Stripe webhook verified")
-    except Exception as e:
-        app.logger.error(f"❌ Stripe webhook failed: {e}")
+    except Exception:
         abort(400)
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
         metadata = session.get('metadata', {})
-        app.logger.info(f"✅ Webhook metadata received: {metadata}")
         send_email(
             metadata.get('from_name', 'Anonymous'),
             metadata.get('from_email'),
@@ -107,35 +133,32 @@ def send_email(from_name, from_email, to_email, message, attachments):
     email_pass = os.getenv("SMTP_PASS")
     smtp_host = os.getenv("SMTP_HOST")
     smtp_port = int(os.getenv("SMTP_PORT", "465"))
-    from_address = os.getenv("SMTP_USERNAME")  # Patched: match Zoho relay auth
+    from_address = os.getenv("From_Email")
 
     msg = EmailMessage()
-    msg['Subject'] = f"Message from {from_name}"
-    msg['From'] = f"Anonymous Mailer <{from_address}>"  # Patched: friendly display
-    msg['To'] = to_email
+    msg["Subject"] = f"Message from {from_name}"
+    msg["From"] = from_address
+    msg["To"] = to_email
     if from_email:
-        msg['Reply-To'] = from_email
+        msg["Reply-To"] = from_email
     msg.set_content(message)
-
-    app.logger.info(f"📨 Preparing email to {to_email} from {from_address}")
 
     for filename in attachments:
         path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         try:
-            with open(path, 'rb') as f:
+            with open(path, "rb") as f:
                 data = f.read()
                 msg.add_attachment(data, maintype='application', subtype='octet-stream', filename=filename)
-            app.logger.info(f"📎 Attached file: {filename}")
         except Exception as e:
-            app.logger.error(f"❌ Failed to attach file {filename}: {e}")
+            print(f"Attachment error: {e}")
 
     try:
         with smtplib.SMTP_SSL(smtp_host, smtp_port) as server:
             server.login(email_user, email_pass)
             server.send_message(msg)
-            app.logger.info(f"✅ Email sent to {to_email}")
+            print(f"Email sent to {to_email}")
     except Exception as e:
-        app.logger.error(f"❌ SMTP error: {e}")
+        print(f"SMTP error: {e}")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
