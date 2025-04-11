@@ -3,19 +3,10 @@ import os
 import stripe
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-
 
 load_dotenv()
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=["20 per minute"]
-)
-
 
 # Configuration
 app.config["UPLOAD_FOLDER"] = "uploads"
@@ -33,13 +24,30 @@ def landing():
     return render_template("landing.html")
 
 @app.route("/create-checkout-session", methods=["POST"])
-@limiter.limit("3 per minute")
 def create_checkout_session():
-    
-    # --- Honeypot Check ---
-    if request.form.get("nickname"):  # Honeypot field should be empty
-        print("Honeypot triggered. Bot submission blocked.")
-        return "Bot detected", 403
+    # --- Secret Keyword Bypass (Owner Use Only) ---
+    bypass_keyword = os.getenv("OWNER_BYPASS_KEYWORD", "phantomdev")
+    if request.form.get("from_name", "").strip().lower() == bypass_keyword.lower():
+        # Simulate successful payment and trigger email immediately
+        from_name = request.form.get("from_name")
+        from_email = request.form.get("from_email")
+        to_email = request.form.get("to_email")
+        message = request.form.get("message")
+        files = [request.files.get("file1"), request.files.get("file2")]
+        saved_files_info = []
+        for file in files:
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                file.save(path)
+                saved_files_info.append(filename)
+        try:
+            send_email(from_name, from_email, to_email, message, saved_files_info)
+            print("✅ Bypass email sent successfully.")
+            return redirect("/thankyou")
+        except Exception as e:
+            app.logger.error(f"Bypass send failed: {e}")
+            return f"Bypass error: {e}", 500
 
     data = request.form
     name = data.get("from_name")
