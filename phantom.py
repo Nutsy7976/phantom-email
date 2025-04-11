@@ -46,9 +46,9 @@ def contact():
         msg["Subject"] = "Contact Publisher Form Submission"
         msg["From"] = from_address
         msg["To"] = to_address
-        msg.set_content(f"Name: {name}
+        msg.set_content(f"""Name: {name}
 Contact: {contact_method}
-Purpose: {purpose}")
+Purpose: {purpose}""")
 
         try:
             with smtplib.SMTP_SSL(smtp_host, smtp_port) as server:
