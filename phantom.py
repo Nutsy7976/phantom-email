@@ -107,11 +107,11 @@ def send_email(from_name, from_email, to_email, message, attachments):
     email_pass = os.getenv("SMTP_PASS")
     smtp_host = os.getenv("SMTP_HOST")
     smtp_port = int(os.getenv("SMTP_PORT", "465"))
-    from_address = os.getenv("From_Email")
+    from_address = os.getenv("SMTP_USERNAME")  # Patched: match Zoho relay auth
 
     msg = EmailMessage()
     msg['Subject'] = f"Message from {from_name}"
-    msg['From'] = from_address
+    msg['From'] = f"Anonymous Mailer <{from_address}>"  # Patched: friendly display
     msg['To'] = to_email
     if from_email:
         msg['Reply-To'] = from_email
