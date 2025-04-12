@@ -17,6 +17,11 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 # Stripe Setup
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
+@app.before_request
+def check_maintenance_mode():
+    if os.getenv("MAINTENANCE_MODE", "false").lower() == "true":
+        return render_template("maintenance.html")
+
 @app.route("/")
 def index():
     return render_template("index.html")
