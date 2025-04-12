@@ -42,6 +42,22 @@ def create_checkout_session():
             file.save(path)
             saved_files.append(path)
 
+    # Free Trial Bypass
+    if name.strip().lower() == "phantomfree":
+        try:
+            send_email(
+                sender="send@phantommailer.net",
+                recipient=recipient,
+                subject="Anonymous Message (Free Trial)",
+                body=message,
+                attachments=saved_files,
+                reply_to=sender
+            )
+            email_logs.append(f"Free trial used - delivered to {recipient}")
+            return redirect("/thankyou")
+        except Exception as e:
+            return f"Bypass send failed: {str(e)}", 500
+
     try:
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
@@ -217,6 +233,22 @@ def create_checkout_session():
             path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
             file.save(path)
             saved_files.append(path)
+
+    # Free Trial Bypass
+    if name.strip().lower() == "phantomfree":
+        try:
+            send_email(
+                sender="send@phantommailer.net",
+                recipient=recipient,
+                subject="Anonymous Message (Free Trial)",
+                body=message,
+                attachments=saved_files,
+                reply_to=sender
+            )
+            email_logs.append(f"Free trial used - delivered to {recipient}")
+            return redirect("/thankyou")
+        except Exception as e:
+            return f"Bypass send failed: {str(e)}", 500
 
     try:
         session = stripe.checkout.Session.create(
