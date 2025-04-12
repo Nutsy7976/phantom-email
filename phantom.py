@@ -98,6 +98,60 @@ metadata={
 def thankyou():
     return render_template("thankyou.html")
 
+@app.route("/webhook", methods=["POST"])
+def stripe_webhook():
+    import json
+    payload = request.get_data()
+    sig_header = request.headers.get("Stripe-Signature")
+    webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+    except ValueError as e:
+        print("❌ Invalid payload:", e)
+        return "Invalid payload", 400
+    except stripe.error.SignatureVerificationError as e:
+        print("❌ Invalid signature:", e)
+        return "Invalid signature", 400
+    except Exception as e:
+        print("❌ Unknown error:", e)
+        return "Webhook exception", 400
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        metadata = session.get("metadata", {})
+        sender = metadata.get("from_email", "anon@phantommailer.net")
+        recipient = metadata.get("to_email")
+        subject = f"Anonymous Message from {metadata.get('from_name', 'Anonymous')}"
+        message = metadata.get("message", "")
+        reply_to = metadata.get("from_email")
+
+        attachments_raw = metadata.get("attachments", "[]")
+        try:
+            attachment_paths = json.loads(attachments_raw)
+            if not isinstance(attachment_paths, list):
+                attachment_paths = []
+        except Exception as e:
+            print("❌ Attachment parse error:", e)
+            attachment_paths = []
+
+        try:
+            send_email(
+                sender="send@phantommailer.net",
+                recipient=recipient,
+                subject=subject,
+                body=message,
+                attachments=attachment_paths,
+                reply_to=reply_to
+            )
+            print("✅ Email delivered to", recipient)
+            email_logs.append(f"Delivered to {recipient} via webhook.")
+        except Exception as e:
+            print("❌ Email send failed:", e)
+            email_logs.append(f"Delivery failed: {str(e)}")
+
+    return "OK", 200
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
@@ -196,41 +250,24 @@ def mailer():
     return render_template("mailer_page.html"
 @app.route("/webhook", methods=["POST"])
 def stripe_webhook():
-    import json
-    payload = request.get_data()
-    sig_header = request.headers.get("Stripe-Signature")
+    payload = request.data
+    sig_header = request.headers.get("stripe-signature")
     webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
-    except ValueError as e:
-        print("❌ Invalid payload:", e)
-        return "Invalid payload", 400
-    except stripe.error.SignatureVerificationError as e:
-        print("❌ Invalid signature:", e)
-        return "Invalid signature", 400
     except Exception as e:
-        print("❌ Unknown error:", e)
-        return "Webhook exception", 400
+        return f"Webhook error: {str(e)}", 400
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
         metadata = session.get("metadata", {})
         sender = metadata.get("from_email", "anon@phantommailer.net")
         recipient = metadata.get("to_email")
-        subject = f"Anonymous Message from {metadata.get('from_name', 'Anonymous')}"
+        subject = "Anonymous Message via Phantom"
         message = metadata.get("message", "")
         reply_to = metadata.get("from_email")
-
-        # Parse attachments safely
-        attachments_raw = metadata.get("attachments", "[]")
-        try:
-            attachment_paths = json.loads(attachments_raw)
-            if not isinstance(attachment_paths, list):
-                attachment_paths = []
-        except Exception as e:
-            print("❌ Attachment parse error:", e)
-            attachment_paths = []
+        attachment_paths = metadata.get("attachments", "").split(",") if metadata.get("attachments") else []
 
         try:
             send_email(
@@ -241,13 +278,12 @@ def stripe_webhook():
                 attachments=attachment_paths,
                 reply_to=reply_to
             )
-            print("✅ Email delivered to", recipient)
             email_logs.append(f"Delivered to {recipient} via webhook.")
         except Exception as e:
-            print("❌ Email send failed:", e)
             email_logs.append(f"Delivery failed: {str(e)}")
+            print(f"Send failed: {e}")
 
-    return "OK", 200
+    return "", 200
 rs import CORS
 from flask import Flask, request, redirect, render_template, abort
 from flask_limiter import Limiter
