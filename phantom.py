@@ -1,3 +1,4 @@
+# Force redeploy to refresh index.html with Free Trial checkbox
 from flask_cors import CORS
 from flask import Flask, request, redirect, render_template
 import os
