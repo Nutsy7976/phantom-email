@@ -129,21 +129,33 @@ def webhook():
         session = event["data"]["object"]
         metadata = session.get("metadata", {})
 
-        if metadata.get("from_name", "").lower() == "phantomfree":
-            now = time.time()
-            if ip in used_ips and now - used_ips[ip] < 86400:
-                return "Free trial already used. Payment required.", 403
-            used_ips[ip] = now
+        from_name = metadata.get("from_name", "")
+        from_email = metadata.get("from_email", "")
+        to_email = metadata.get("to_email", "")
+        subject = metadata.get("subject", "Anonymous Message")
+        message = metadata.get("message", "")
+        reply_to = metadata.get("reply_to")
+        attachments = json.loads(metadata.get("attachments", "[]"))
 
-        send_email(
-            from_name=metadata.get("from_name"),
-            from_email=metadata.get("from_email"),
-            to_email=metadata.get("to_email"),
-            subject=metadata.get("subject"),
-            message=metadata.get("message"),
-            reply_to=metadata.get("reply_to"),
-            attachments=json.loads(metadata.get("attachments", "[]"))
-        )
+        try:
+            if from_name.lower() == "phantomfree":
+                now = time.time()
+                if ip in used_ips and now - used_ips[ip] < 86400:
+                    return "Free trial already used. Payment required.", 403
+                used_ips[ip] = now
+
+            send_email(
+                from_name=from_name,
+                from_email=from_email,
+                to_email=to_email,
+                subject=subject,
+                message=message,
+                reply_to=reply_to,
+                attachments=attachments
+            )
+        except Exception as e:
+            return f"Send error: {str(e)}", 500
+
     return jsonify(success=True), 200
 
 email_logs = []
