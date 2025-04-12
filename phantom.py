@@ -69,6 +69,24 @@ def thankyou():
 def qr():
     return render_template("qr_flyer.html")
 
+used_ips = {}
+
+@app.route("/bypass-check", methods=["POST"])
+def bypass_check():
+    from_name = request.form.get("from_name", "").lower()
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+
+    # Handle phantomfree bypass
+    if from_name == "phantomfree":
+        now = time.time()
+        if ip in used_ips and now - used_ips[ip] < 86400:
+            return "You already used the free Phantom trial. Please purchase to send more.", 403
+        used_ips[ip] = now
+        # You would normally trigger send_email() here
+        return "Bypass granted. Message would be sent.", 200
+
+    return "Invalid bypass or not allowed.", 403
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
