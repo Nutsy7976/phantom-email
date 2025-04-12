@@ -54,6 +54,13 @@ def create_checkout_session():
                 "quantity": 1,
             }],
             mode="payment",
+metadata={
+                "from_name": name,
+                "from_email": sender,
+                "to_email": recipient,
+                "message": message,
+                "attachments": ",".join(saved_files)
+            },
             success_url=request.host_url + "thankyou",
             cancel_url=request.host_url,
         )
