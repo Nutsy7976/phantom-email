@@ -213,7 +213,16 @@ def stripe_webhook():
         subject = "Anonymous Message via Phantom"
         message = metadata.get("message", "")
         reply_to = metadata.get("from_email")
-        attachment_paths = metadata.get("attachments", "").split(",") if metadata.get("attachments") else []
+        import json
+
+attachments_raw = metadata.get("attachments", "[]")
+try:
+    attachment_paths = json.loads(attachments_raw)
+    if not isinstance(attachment_paths, list):
+        attachment_paths = []
+except Exception as e:
+    print(f"Attachment parse error: {e}")
+    attachment_paths = []
 
         try:
             send_email(
