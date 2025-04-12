@@ -426,3 +426,15 @@ def view_reply():
 @app.route("/mailer")
 def mailer():
     return render_template("mailer_page.html")
+
+@app.route("/favicon.ico")
+def favicon():
+    return app.send_static_file("favicon.ico")
+
+@app.route("/sitemap.xml")
+def sitemap():
+    return app.send_static_file("sitemap.xml")
+
+@app.route("/robots.txt")
+def robots():
+    return app.send_static_file("robots.txt")
