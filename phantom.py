@@ -131,3 +131,23 @@ def view_reply():
 @app.route("/mailer")
 def mailer():
     return render_template("anonmail.html")
+
+@app.route("/webhook", methods=["POST"])
+def stripe_webhook():
+    payload = request.data
+    sig_header = request.headers.get("stripe-signature")
+    webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+    except Exception as e:
+        return f"Webhook error: {str(e)}", 400
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        email_logs.append(f"Payment confirmed for session: {session.get('id')}")
+        # Here you'd call send_email(session) if it existed
+        # For now, we just log and confirm
+        print("Webhook triggered: Email send would happen here.")
+
+    return "", 200
