@@ -1,5 +1,8 @@
 from flask_cors import CORS
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, abort
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import requests
 import os
 import stripe
 from dotenv import load_dotenv
@@ -25,8 +28,15 @@ def landing():
     return render_template("landing.html")
 
 @app.route("/create-checkout-session", methods=["POST"])
+@limiter.limit("5 per minute")
 def create_checkout_session():
     data = request.form
+
+    # Abuse protection: CAPTCHA + honeypot + rate limiter
+    if not validate_captcha(data.get("cf-turnstile-response", ""), request.remote_addr):
+        return "CAPTCHA verification failed", 403
+    if data.get("website") != "":
+        return "Bot detected", 403
     name = data.get("from_name")
     sender = data.get("from_email")
     recipient = data.get("to_email")
@@ -118,7 +128,22 @@ def purge_old_files():
             pass
 
 # Run purge every hour
-def start_purge_thread():
+def start_purge_thread()
+
+# Abuse Protection Setup
+limiter = Limiter(get_remote_address, app=app)
+
+TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY")
+def validate_captcha(token, remote_ip):
+    response = requests.post(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        data={
+            "secret": TURNSTILE_SECRET_KEY,
+            "response": token,
+            "remoteip": remote_ip
+        }
+    )
+    return response.json().get("success", False):
     def loop():
         while True:
             purge_old_files()
@@ -127,6 +152,21 @@ def start_purge_thread():
     t.start()
 
 start_purge_thread()
+
+# Abuse Protection Setup
+limiter = Limiter(get_remote_address, app=app)
+
+TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY")
+def validate_captcha(token, remote_ip):
+    response = requests.post(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        data={
+            "secret": TURNSTILE_SECRET_KEY,
+            "response": token,
+            "remoteip": remote_ip
+        }
+    )
+    return response.json().get("success", False)
 
 import secrets
 
@@ -191,7 +231,10 @@ def stripe_webhook():
 
     return "", 200
 rs import CORS
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, abort
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import requests
 import os
 import stripe
 from dotenv import load_dotenv
@@ -217,8 +260,15 @@ def landing():
     return render_template("landing.html")
 
 @app.route("/create-checkout-session", methods=["POST"])
+@limiter.limit("5 per minute")
 def create_checkout_session():
     data = request.form
+
+    # Abuse protection: CAPTCHA + honeypot + rate limiter
+    if not validate_captcha(data.get("cf-turnstile-response", ""), request.remote_addr):
+        return "CAPTCHA verification failed", 403
+    if data.get("website") != "":
+        return "Bot detected", 403
     name = data.get("from_name")
     sender = data.get("from_email")
     recipient = data.get("to_email")
@@ -310,7 +360,22 @@ def purge_old_files():
             pass
 
 # Run purge every hour
-def start_purge_thread():
+def start_purge_thread()
+
+# Abuse Protection Setup
+limiter = Limiter(get_remote_address, app=app)
+
+TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY")
+def validate_captcha(token, remote_ip):
+    response = requests.post(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        data={
+            "secret": TURNSTILE_SECRET_KEY,
+            "response": token,
+            "remoteip": remote_ip
+        }
+    )
+    return response.json().get("success", False):
     def loop():
         while True:
             purge_old_files()
@@ -319,6 +384,21 @@ def start_purge_thread():
     t.start()
 
 start_purge_thread()
+
+# Abuse Protection Setup
+limiter = Limiter(get_remote_address, app=app)
+
+TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY")
+def validate_captcha(token, remote_ip):
+    response = requests.post(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        data={
+            "secret": TURNSTILE_SECRET_KEY,
+            "response": token,
+            "remoteip": remote_ip
+        }
+    )
+    return response.json().get("success", False)
 
 import secrets
 
