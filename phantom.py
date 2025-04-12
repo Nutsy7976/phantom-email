@@ -202,27 +202,34 @@ def stripe_webhook():
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+    except ValueError as e:
+        print(f"Invalid payload: {e}")
+        return "Invalid payload", 400
+    except stripe.error.SignatureVerificationError as e:
+        print(f"Signature error: {e}")
+        return "Signature verification failed", 400
     except Exception as e:
-        return f"Webhook error: {str(e)}", 400
+        print(f"Unknown webhook error: {e}")
+        return "Webhook error", 400
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
         metadata = session.get("metadata", {})
         sender = metadata.get("from_email", "anon@phantommailer.net")
         recipient = metadata.get("to_email")
-        subject = "Anonymous Message via Phantom"
+        subject = f"Anonymous Message from {metadata.get('from_name', 'Anonymous')}"
         message = metadata.get("message", "")
         reply_to = metadata.get("from_email")
-        import json
 
-attachments_raw = metadata.get("attachments", "[]")
-try:
-    attachment_paths = json.loads(attachments_raw)
-    if not isinstance(attachment_paths, list):
-        attachment_paths = []
-except Exception as e:
-    print(f"Attachment parse error: {e}")
-    attachment_paths = []
+        # Safe attachment parsing
+        attachments_raw = metadata.get("attachments", "[]")
+        try:
+            attachment_paths = json.loads(attachments_raw)
+            if not isinstance(attachment_paths, list):
+                attachment_paths = []
+        except Exception as e:
+            print(f"Attachment parse error: {e}")
+            attachment_paths = []
 
         try:
             send_email(
@@ -235,8 +242,8 @@ except Exception as e:
             )
             email_logs.append(f"Delivered to {recipient} via webhook.")
         except Exception as e:
-            email_logs.append(f"Delivery failed: {str(e)}")
             print(f"Send failed: {e}")
+            email_logs.append(f"Delivery failed: {str(e)}")
 
     return "", 200
 rs import CORS
