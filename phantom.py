@@ -187,7 +187,13 @@ def webhook_diagnostic():
     return jsonify(status="received", diagnostic_mode=True), 200
 
 
+
+@app.route("/diagnostic-test")
+def diag():
+    return "✅ This IS the diagnostic phantom.py!", 200
+
 # --- Main Execution ---
+
 if __name__ == "__main__":
     if not webhook_secret:
         print("WARNING: STRIPE_WEBHOOK_SECRET environment variable not set.")
