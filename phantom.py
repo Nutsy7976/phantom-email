@@ -1,3 +1,4 @@
+from flask_cors import CORS
 from flask import Flask, request, redirect, render_template
 import os
 import stripe
@@ -66,3 +67,63 @@ def thankyou():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+
+
+email_logs = []
+
+@app.route("/stealth")
+def stealth_panel():
+    token = request.args.get("token")
+    if token != os.getenv("STEALTH_TOKEN"):
+        abort(403)
+    html = "<h2>Recent Message Logs</h2><ul>"
+    for log in email_logs[-25:]:
+        html += f"<li>{log}</li>"
+    html += "</ul>"
+    return html
+
+import threading
+
+def purge_old_files():
+    import os, time, glob
+    cutoff = time.time() - (36 * 3600)
+    for f in glob.glob("uploads/*"):
+        try:
+            if os.path.isfile(f) and os.path.getmtime(f) < cutoff:
+                os.remove(f)
+        except:
+            pass
+
+# Run purge every hour
+def start_purge_thread():
+    def loop():
+        while True:
+            purge_old_files()
+            time.sleep(3600)
+    t = threading.Thread(target=loop, daemon=True)
+    t.start()
+
+start_purge_thread()
+
+import secrets
+
+# In-memory storage for incoming replies
+inbox_store = {}
+
+# Utility to generate a unique reply address and inbox key
+def generate_reply_address():
+    key = secrets.token_hex(8)
+    address = f"reply-{key}@phantommailer.net"
+    inbox_store[key] = {"created": time.time(), "message": None}
+    return key, address
+
+# Route to view replies
+@app.route("/reply")
+def view_reply():
+    key = request.args.get("key")
+    token = request.args.get("token")
+    if not key or token != os.getenv("REPLY_SECRET_KEY"):
+        abort(403)
+    if key not in inbox_store or inbox_store[key]["message"] is None:
+        return "No reply found or expired.", 404
+    return f"<h2>Anonymous Reply</h2><p>{inbox_store[key]['message']}</p>"
