@@ -196,21 +196,22 @@ def mailer():
     return render_template("mailer_page.html"
 @app.route("/webhook", methods=["POST"])
 def stripe_webhook():
-    payload = request.data
-    sig_header = request.headers.get("stripe-signature")
+    import json
+    payload = request.get_data()
+    sig_header = request.headers.get("Stripe-Signature")
     webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
     except ValueError as e:
-        print(f"Invalid payload: {e}")
+        print("❌ Invalid payload:", e)
         return "Invalid payload", 400
     except stripe.error.SignatureVerificationError as e:
-        print(f"Signature error: {e}")
-        return "Signature verification failed", 400
+        print("❌ Invalid signature:", e)
+        return "Invalid signature", 400
     except Exception as e:
-        print(f"Unknown webhook error: {e}")
-        return "Webhook error", 400
+        print("❌ Unknown error:", e)
+        return "Webhook exception", 400
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
@@ -221,14 +222,14 @@ def stripe_webhook():
         message = metadata.get("message", "")
         reply_to = metadata.get("from_email")
 
-        # Safe attachment parsing
+        # Parse attachments safely
         attachments_raw = metadata.get("attachments", "[]")
         try:
             attachment_paths = json.loads(attachments_raw)
             if not isinstance(attachment_paths, list):
                 attachment_paths = []
         except Exception as e:
-            print(f"Attachment parse error: {e}")
+            print("❌ Attachment parse error:", e)
             attachment_paths = []
 
         try:
@@ -240,12 +241,13 @@ def stripe_webhook():
                 attachments=attachment_paths,
                 reply_to=reply_to
             )
+            print("✅ Email delivered to", recipient)
             email_logs.append(f"Delivered to {recipient} via webhook.")
         except Exception as e:
-            print(f"Send failed: {e}")
+            print("❌ Email send failed:", e)
             email_logs.append(f"Delivery failed: {str(e)}")
 
-    return "", 200
+    return "OK", 200
 rs import CORS
 from flask import Flask, request, redirect, render_template, abort
 from flask_limiter import Limiter
