@@ -37,6 +37,7 @@
 
         .site-header h1 {
             font-size: 2rem;
+            margin-top: -1.5rem;
             color: #00ffff;
             margin-bottom: 0.5rem; /* Reduced margin slightly */
             font-weight: 600;
@@ -60,6 +61,7 @@
 
         /* Hero Section */
         .hero {
+            margin-top: -144px;
             padding: 3rem 0;
         }
 
@@ -166,14 +168,54 @@
         }
 
     </style>
-</head>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        .fade-in:nth-child(1) { animation-delay: 0.2s; }
+        .fade-in:nth-child(2) { animation-delay: 0.4s; }
+        .fade-in:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cta-button {
+            box-shadow: 0 0 12px rgba(0, 204, 153, 0.5);
+        }
+
+        .hero h2 {
+            color: #00ffff;
+            text-shadow: 0 0 4px #00ffff88;
+        }
+
+        .features-grid .feature-item {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .features-grid .feature-item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.2);
+        }
+    </style>
+    </head>
 <body>
 
     <header class="site-header">
         <div class="container">
             <h1>Phantom</h1>
             <!-- === ADDED IMAGE HERE === -->
-            <img src="/static/images/phantom_logo.png" alt="Phantom logo - white mask icon above the word PHANTOM" class="header-logo">
+            <img src="static/images/phantom_logo.png" alt="Phantom logo - white mask icon above the word PHANTOM" class="header-logo">
             <!-- === END IMAGE === -->
         </div>
     </header>
@@ -181,8 +223,8 @@
     <main>
         <section class="hero">
             <div class="container">
-                <h2>Digital Invisibility, On Demand.</h2>
-                <p>
+                <h2 class="fade-in">Digital Invisibility, On Demand.</h2>
+                <p class="fade-in">
                     Send completely anonymous, self-destructing emails. We offer spoofed identities,
                     guarantee no logs, and provide zero tracking. Your privacy is paramount.
                 </p>
@@ -194,29 +236,29 @@
             <div class="container">
                 <h3>Why Choose Phantom?</h3>
                 <div class="features-grid">
-                    <div class="feature-item">
+                    <div class="feature-item fade-in">
                         <h4>True Anonymity</h4>
-                        <p>Your identity is masked. Send without revealing your real email or IP address.</p>
+                        <p class="fade-in">Your identity is masked. Send without revealing your real email or IP address.</p>
                     </div>
-                    <div class="feature-item">
+                    <div class="feature-item fade-in">
                         <h4>Self-Destructing Messages</h4>
-                        <p>Emails can be set to vanish after reading or after a specific time, leaving no trace.</p>
+                        <p class="fade-in">Emails can be set to vanish after reading or after a specific time, leaving no trace.</p>
                     </div>
-                    <div class="feature-item">
+                    <div class="feature-item fade-in">
                         <h4>Spoofed Identity</h4>
-                        <p>Appear as someone else (use responsibly!). Ideal for specific scenarios requiring discretion.</p>
+                        <p class="fade-in">Appear as someone else (use responsibly!). Ideal for specific scenarios requiring discretion.</p>
                     </div>
-                    <div class="feature-item">
+                    <div class="feature-item fade-in">
                         <h4>Zero Logs Policy</h4>
-                        <p>We don't store records of your activity, messages, or metadata. Period.</p>
+                        <p class="fade-in">We don't store records of your activity, messages, or metadata. Period.</p>
                     </div>
-                    <div class="feature-item">
+                    <div class="feature-item fade-in">
                         <h4>No Tracking</h4>
-                        <p>Our service includes no tracking pixels or hidden identifiers in your emails.</p>
+                        <p class="fade-in">Our service includes no tracking pixels or hidden identifiers in your emails.</p>
                     </div>
-                     <div class="feature-item">
+                     <div class="feature-item fade-in">
                         <h4>Built for Privacy</h4>
-                        <p>Perfect for whistleblowers, journalists, privacy advocates, or just for fun.</p>
+                        <p class="fade-in">Perfect for whistleblowers, journalists, privacy advocates, or just for fun.</p>
                     </div>
                 </div>
             </div>
@@ -226,7 +268,7 @@
 
     <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2023 Phantom Services. All Rights Reserved. Use Responsibly.</p>
+            <p class="fade-in">&copy; 2023 Phantom Services. All Rights Reserved. Use Responsibly.</p>
             <!-- Add links here if needed: <a href="/privacy">Privacy Policy</a> | <a href="/terms">Terms</a> -->
         </div>
     </footer>
