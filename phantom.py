@@ -18,7 +18,7 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("homepage.html")
 
 @app.route("/landing")
 def landing():
@@ -61,11 +61,6 @@ def create_checkout_session():
     except Exception as e:
         return f"Error: {str(e)}", 500
 
-
-
-@app.route("/mailer")
-def mailer():
-    return render_template("mailer.html")
 @app.route("/thankyou")
 def thankyou():
     return render_template("thankyou.html")
@@ -132,3 +127,7 @@ def view_reply():
     if key not in inbox_store or inbox_store[key]["message"] is None:
         return "No reply found or expired.", 404
     return f"<h2>Anonymous Reply</h2><p>{inbox_store[key]['message']}</p>"
+
+@app.route("/mailer")
+def mailer():
+    return render_template("anonmail.html")
