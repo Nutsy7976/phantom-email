@@ -116,7 +116,11 @@
 
     <div class="form-box">
       <form action="/create-checkout-session" enctype="multipart/form-data" method="post">
-        <input name="from_name" placeholder="Fictitious Name" required type="text"/>
+        <label style="display: block; margin-bottom: 10px;">
+  <input type="checkbox" name="free_trial" id="free_trial" style="margin-right: 8px;">
+  <strong>Try Phantom for Free:</strong> Check this box to send one anonymous message for free (once per IP).
+</label>
+<input name="from_name" placeholder="Fictitious Name" required type="text"/>
         <input name="from_email" placeholder="Fictitious Email" required type="email"/>
         <input name="to_email" placeholder="Recipient Email" required type="email"/>
         <textarea name="message" placeholder="Your message..." required rows="6"></textarea>
