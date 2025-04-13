@@ -1,4 +1,3 @@
-
 from flask import Flask, request, redirect, render_template
 import os
 import stripe
@@ -85,5 +84,75 @@ def stripe_webhook():
 
     return "OK", 200
 
+
+@app.route("/reprocess-failed-events", methods=["GET"])
+def reprocess_failed_events():
+    stripe.api_key = "sk_live_..."  # Your actual secret key
+
+    events = stripe.Event.list(
+        types=["checkout.session.completed"],
+        delivery_success=False
+    )
+
+    output = []
+    for event in events.auto_paging_iter():
+        payload = json.dumps(event)
+        sig_header = ""
+        endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+        try:
+            reconstructed_event = stripe.Webhook.construct_event(
+                payload=payload,
+                sig_header=sig_header,
+                secret=endpoint_secret
+            )
+        except Exception as e:
+            output.append(f"❌ Skipping {event.id} due to error: {str(e)}")
+            continue
+
+        if reconstructed_event["type"] == "checkout.session.completed":
+            session = reconstructed_event["data"]["object"]
+            msg = (
+                f"✅ Payment: {session.get('id')} | "
+                f"👤 Email: {session.get('customer_email')} | "
+                f"🧾 Metadata: {session.get('metadata')}"
+            )
+            output.append(msg)
+
+    return "<br>".join(output)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+
+
+import stripe
+stripe.api_key = "sk_live_..."  # Use your real secret key here
+
+events = stripe.Event.list(
+    types=["checkout.session.completed"],
+    delivery_success=False  # Only failed events
+)
+
+for event in events.auto_paging_iter():
+    print(f"REPROCESSING: {event.id}")
+    # Simulate webhook reprocessing by calling your handler logic
+    payload = json.dumps(event)
+    sig_header = ""  # Not used in manual case
+    endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+    try:
+        reconstructed_event = stripe.Webhook.construct_event(
+            payload=payload,
+            sig_header=sig_header,
+            secret=endpoint_secret
+        )
+    except Exception as e:
+        print("Skipping due to error:", str(e))
+        continue
+
+    if reconstructed_event["type"] == "checkout.session.completed":
+        session = reconstructed_event["data"]["object"]
+        print("✅ Payment:", session.get("id"))
+        print("👤 Email:", session.get("customer_email"))
+        print("🧾 Metadata:", session.get("metadata"))
