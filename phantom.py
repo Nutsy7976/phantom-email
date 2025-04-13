@@ -1,3 +1,4 @@
+
 from flask import Flask, request, redirect, render_template
 import os
 import stripe
@@ -53,13 +54,6 @@ def create_checkout_session():
             mode="payment",
             success_url=request.host_url + "thankyou",
             cancel_url=request.host_url,
-    metadata={
-        "from_name": name,
-        "from_email": sender,
-        "to_email": recipient,
-        "message": message,
-        "attachments": json.dumps(saved_files)
-    },
         )
         return redirect(session.url, code=303)
     except Exception as e:
@@ -70,8 +64,6 @@ def thankyou():
     return render_template("thankyou.html")
 
 
-import json
-
 @app.route("/webhook", methods=["POST"])
 def stripe_webhook():
     payload = request.data
@@ -79,9 +71,7 @@ def stripe_webhook():
     endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
-        )
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
     except ValueError:
         return "Invalid payload", 400
     except stripe.error.SignatureVerificationError:
