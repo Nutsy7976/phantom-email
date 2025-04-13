@@ -1,13 +1,15 @@
 from flask import Flask, request, redirect, render_template
 import os
 import stripe
+import json
+import logging
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 
 load_dotenv()
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
-
 app.config["UPLOAD_FOLDER"] = "uploads"
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
@@ -53,6 +55,13 @@ def create_checkout_session():
             mode="payment",
             success_url=request.host_url + "thankyou",
             cancel_url=request.host_url,
+            metadata={
+                "from_name": name,
+                "from_email": sender,
+                "to_email": recipient,
+                "message": message,
+                "attachments": json.dumps(saved_files)
+            }
         )
         return redirect(session.url, code=303)
     except Exception as e:
@@ -62,6 +71,13 @@ def create_checkout_session():
 def thankyou():
     return render_template("thankyou.html")
 
+def send_email(from_name, from_email, to_email, message, attachments):
+    print("Sending email:")
+    print("From:", from_name, "<" + from_email + ">")
+    print("To:", to_email)
+    print("Message:", message)
+    print("Attachments:", attachments)
+    # Implement real email send here with SMTP2GO/Zoho.
 
 @app.route("/webhook", methods=["POST"])
 def stripe_webhook():
@@ -78,17 +94,30 @@ def stripe_webhook():
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
-        print("💸 Payment succeeded!")
-        print("Customer Email:", session.get("customer_email"))
-        print("Metadata:", session.get("metadata"))
+        metadata = session.get("metadata", {})
+        try:
+            attachments = json.loads(metadata.get("attachments", "[]"))
+        except Exception:
+            attachments = []
+
+        send_email(
+            from_name=metadata.get("from_name", ""),
+            from_email=metadata.get("from_email", ""),
+            to_email=metadata.get("to_email", ""),
+            message=metadata.get("message", ""),
+            attachments=attachments
+        )
+
+        for path in attachments:
+            try:
+                os.remove(path)
+            except Exception as e:
+                logging.warning(f"Failed to delete file {path}: {e}")
 
     return "OK", 200
 
-
 @app.route("/reprocess-failed-events", methods=["GET"])
 def reprocess_failed_events():
-    stripe.api_key = os.getenv("STRIPE_SECRET_KEY")  # Your actual secret key
-
     events = stripe.Event.list(
         types=["checkout.session.completed"],
         delivery_success=False
@@ -112,47 +141,34 @@ def reprocess_failed_events():
 
         if reconstructed_event["type"] == "checkout.session.completed":
             session = reconstructed_event["data"]["object"]
+            metadata = session.get("metadata", {})
+            try:
+                attachments = json.loads(metadata.get("attachments", "[]"))
+            except Exception:
+                attachments = []
+
+            send_email(
+                from_name=metadata.get("from_name", ""),
+                from_email=metadata.get("from_email", ""),
+                to_email=metadata.get("to_email", ""),
+                message=metadata.get("message", ""),
+                attachments=attachments
+            )
+
             msg = (
                 f"✅ Payment: {session.get('id')} | "
                 f"👤 Email: {session.get('customer_email')} | "
-                f"🧾 Metadata: {session.get('metadata')}"
+                f"🧾 Metadata: {metadata}"
             )
             output.append(msg)
 
-    return "<br>".join(output)
+            for path in attachments:
+                try:
+                    os.remove(path)
+                except Exception as e:
+                    logging.warning(f"Failed to delete file {path}: {e}")
 
+    return "<br>".join(output)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-
-
-import stripe
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")  # Use your real secret key here
-
-events = stripe.Event.list(
-    types=["checkout.session.completed"],
-    delivery_success=False  # Only failed events
-)
-
-for event in events.auto_paging_iter():
-    print(f"REPROCESSING: {event.id}")
-    # Simulate webhook reprocessing by calling your handler logic
-    payload = json.dumps(event)
-    sig_header = ""  # Not used in manual case
-    endpoint_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
-
-    try:
-        reconstructed_event = stripe.Webhook.construct_event(
-            payload=payload,
-            sig_header=sig_header,
-            secret=endpoint_secret
-        )
-    except Exception as e:
-        print("Skipping due to error:", str(e))
-        continue
-
-    if reconstructed_event["type"] == "checkout.session.completed":
-        session = reconstructed_event["data"]["object"]
-        print("✅ Payment:", session.get("id"))
-        print("👤 Email:", session.get("customer_email"))
-        print("🧾 Metadata:", session.get("metadata"))
