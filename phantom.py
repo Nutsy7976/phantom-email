@@ -87,7 +87,7 @@ def stripe_webhook():
 
 @app.route("/reprocess-failed-events", methods=["GET"])
 def reprocess_failed_events():
-    stripe.api_key = "sk_live_..."  # Your actual secret key
+    stripe.api_key = os.getenv("STRIPE_SECRET_KEY")  # Your actual secret key
 
     events = stripe.Event.list(
         types=["checkout.session.completed"],
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
 
 import stripe
-stripe.api_key = "sk_live_..."  # Use your real secret key here
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")  # Use your real secret key here
 
 events = stripe.Event.list(
     types=["checkout.session.completed"],
