@@ -17,7 +17,7 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("home_page.html")
 
 @app.route("/landing")
 def landing():
