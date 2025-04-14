@@ -218,3 +218,29 @@ def contact():
         print("New contact message:", name, method, purpose)
         return render_template("contact_publisher.html", success=True)
     return render_template("contact_publisher.html")
+
+@app.route("/about.html")
+def about():
+    return render_template("about.html")
+
+@app.route("/terms.html")
+def terms():
+    return render_template("terms.html")
+
+@app.route("/privacy.html")
+def privacy():
+    return render_template("privacy.html")
+
+@app.route("/contact.html", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        name = request.form.get("name")
+        method = request.form.get("method")
+        purpose = request.form.get("purpose")
+        print("New contact message:", name, method, purpose)
+        return render_template("contact_publisher.html", success=True)
+    return render_template("contact_publisher.html")
+
+@app.route("/landing")
+def landing():
+    return render_template("landing.html")
