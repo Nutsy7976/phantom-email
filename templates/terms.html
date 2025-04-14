@@ -1,50 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Terms of Use - Phantom</title>
-  <meta name="description" content="Read the terms of use for Phantom, the anonymous email platform that prioritizes your privacy and security." />
-  <style>
-    body {
-      background-color: #0e0e0e;
-      color: #f2f2f2;
-      font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: auto;
-      padding: 3rem;
-      line-height: 1.7;
-    }
-    h1 {
-      color: #00ffff;
-    }
-    h2 {
-      color: #00cc99;
-    }
-    a {
-      color: #00cc99;
-    }
-  </style>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Terms of Use - Phantom</title>
+    <meta name="description" content="Terms of Use for the Phantom anonymous email service." />
+    <style>
+        :root { /* Assuming variables are defined elsewhere or copy relevant ones here */
+          --bg-main: #0e0e0e; --header-footer-bg: #111111; --panel-bg: #1a1a1a;
+          --text-default: #f2f2f2; --accent-teal: #00ffff; --accent-green: #00cc99;
+          --hover-green: #00e6b8; --muted-text: #999999; --field-bg: #333333;
+          --field-text: #ffffff; --field-border: #444444; --highlight-red: #ff0000;
+          --link-color: var(--accent-green); --link-hover-color: var(--hover-green);
+        }
+        body { background-color: var(--bg-main); color: var(--text-default); font-family: 'Inter', system-ui, sans-serif; max-width: 800px; margin: auto; padding: 2rem; line-height: 1.7; }
+        h1 { color: var(--accent-teal); border-bottom: 1px solid var(--field-border); padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+        h2 { color: var(--accent-green); margin-top: 2rem; margin-bottom: 0.5rem; font-size: 1.4em; }
+        p, li { color: var(--text-default); margin-bottom: 1rem; }
+        ul { padding-left: 20px; }
+        a { color: var(--link-color); text-decoration: none; }
+        a:hover { color: var(--link-hover-color); }
+        strong { color: var(--accent-teal); }
+        .last-updated { color: var(--muted-text); font-size: 0.9em; margin-top: 3rem; }
+        .container { padding: 1rem 0; }
+        .site-footer { background-color: var(--header-footer-bg); color: var(--muted-text); text-align: center; padding: 1.5rem 0; margin-top: 3rem; font-size: 0.9rem; border-top: 1px solid var(--field-border); }
+        .site-footer a { margin: 0 10px; }
+    </style>
 </head>
 <body>
-  <h1>Terms of Use</h1>
-  <p>Welcome to <strong>Phantom</strong>, a privacy-first anonymous email platform. By using this service, you agree to the following terms:</p>
+    <main class="container">
+        <h1>Terms of Use</h1>
+        <p class="last-updated">Last Updated: [Date]</p>
 
-  <h2>1. Legal and Responsible Use</h2>
-  <p>This service is provided as-is, intended for lawful and ethical communication only. Any use of Phantom to harass, threaten, defame, or engage in illegal activities is strictly prohibited.</p>
+        <p>Welcome to Phantom ("the Service"). By accessing or using the Service, you agree to be bound by these Terms of Use ("Terms"). If you do not agree to these Terms, please do not use the Service.</p>
 
-  <h2>2. No Guarantees</h2>
-  <p>While we strive for reliability and privacy, Phantom makes no guarantees about message delivery, uptime, or email server compatibility. Use this service at your own risk.</p>
+        <h2>1. Description of Service</h2>
+        <p>Phantom provides a platform designed to allow users to send emails with enhanced anonymity by relaying messages through our system and masking certain sender information. Payments are required per message sent and are processed via Stripe.</p>
 
-  <h2>3. Privacy and Data Handling</h2>
-  <p>We do not store user IPs, account data, or track your identity. Emails and attachments are auto-deleted after 36 hours. We do not issue receipts or store message logs.</p>
+        <h2>2. Acceptable Use Policy</h2>
+        <p>You agree to use the Service only for lawful and ethical purposes. You are solely responsible for the content of your messages and any consequences arising from sending them. Prohibited uses include, but are not limited to:</p>
+        <ul>
+            <li>Sending spam, unsolicited commercial email, or bulk messages.</li>
+            <li>Engaging in illegal activities, including fraud, phishing, or distributing illegal content.</li>
+            <li>Harassing, threatening, defaming, abusing, or stalking others.</li>
+            <li>Impersonating any person or entity or falsely stating or misrepresenting your affiliation with a person or entity.</li>
+            <li>Distributing viruses, malware, worms, or other harmful code.</li>
+            <li>Violating the intellectual property rights or privacy rights of any third party.</li>
+            <li>Attempting to disrupt or compromise the integrity or security of the Service or related systems.</li>
+        </ul>
+        <p>Violation of this policy may result in immediate blocking from the Service without notice.</p>
 
-  <h2>4. Service Termination</h2>
-  <p>Phantom reserves the right to refuse service or block abusive activity without notice or explanation.</p>
+        <h2>3. Payments</h2>
+        <p>A fee is required to send each email message. All payments are processed securely by our third-party payment processor, Stripe. We do not store your full credit card details. By initiating a payment, you agree to pay the specified fee. All payments are final and non-refundable unless required by law. You are subject to Stripe's own terms and privacy policy when making payments.</p>
 
-  <h2>5. Limitation of Liability</h2>
-  <p>By using Phantom, you accept that the platform and its operators are not liable for any damages, data loss, or consequences arising from the use of this service.</p>
+        <h2>4. Anonymity and Privacy</h2>
+        <p>The Service is designed to enhance user privacy but does not guarantee absolute anonymity. While we take measures like not requiring user accounts and implementing a minimal logging policy (see our <a href="{{ url_for('privacy') }}">Privacy Policy</a>), factors outside our control can affect anonymity (e.g., recipient mail server logging, user's own operational security, content of the message). The "From Email" field you provide sets the `Reply-To` header, allowing recipients to reply to that address; it does not spoof the technical sending address.</p>
+        <p>We handle data temporarily as described in our Privacy Policy.</p>
 
-  <p>Learn more at <a href="https://phantom-email.onrender.com">phantom-email.onrender.com</a></p>
+        <h2>5. Disclaimers and No Guarantees</h2>
+        <p>THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS, WITHOUT ANY WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, RELIABILITY, DELIVERY SUCCESS, UPTIME, OR NON-INFRINGEMENT.</p>
+        <p>We do not guarantee that the Service will meet your requirements, be uninterrupted, timely, secure, error-free, or that emails will be delivered successfully or remain private after delivery.</p>
+
+        <h2>6. Limitation of Liability</h2>
+        <p>TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE OPERATORS OF PHANTOM BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, RESULTING FROM (a) YOUR ACCESS TO OR USE OF OR INABILITY TO ACCESS OR USE THE SERVICE; (b) ANY CONDUCT OR CONTENT OF ANY THIRD PARTY ON THE SERVICE; (c) ANY CONTENT OBTAINED FROM THE SERVICE; OR (d) UNAUTHORIZED ACCESS, USE, OR ALTERATION OF YOUR TRANSMISSIONS OR CONTENT.</p>
+
+        <h2>7. Indemnification</h2>
+        <p>You agree to defend, indemnify, and hold harmless the operators of Phantom from and against any claims, liabilities, damages, losses, and expenses, including reasonable attorney's fees, arising out of or in any way connected with your access to or use of the Service or your violation of these Terms.</p>
+
+        <h2>8. Termination</h2>
+        <p>We reserve the right to suspend or terminate your access to the Service at any time, without notice or liability, for any reason, including but not limited to a breach of these Terms or suspected abusive activity.</p>
+
+        <h2>9. Governing Law</h2>
+        <p>These Terms shall be governed and construed in accordance with the laws of [Your Jurisdiction - e.g., State of California, USA], without regard to its conflict of law provisions.</p>
+
+        <h2>10. Changes to Terms</h2>
+        <p>We reserve the right to modify these Terms at any time. We will notify users of significant changes by posting the new Terms on the Service website. Your continued use of the Service after such changes constitutes your acceptance of the new Terms.</p>
+
+        <h2>11. Contact</h2>
+        <p>For questions about these Terms, please refer to the information on our About page. [Optional: Add specific contact method if desired, carefully considering privacy implications].</p>
+
+    </main>
+
+    {% include 'footer.html' %} {# Assumes Jinja context #}
+    <!-- Fallback Footer if not using Jinja -->
+    <!--
+    <footer class="site-footer">
+        <div>&copy; [Year] Phantom Privacy Mailer.</div>
+    </footer>
+    -->
 </body>
 </html>

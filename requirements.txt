@@ -1,5 +1,21 @@
+# requirements.txt
+
+# Core Framework & Web Server
 flask
-stripe
-python-dotenv
 gunicorn
-Flask-Limiter==3.5.0
+
+# Payment Processing
+stripe
+
+# Configuration & Environment
+python-dotenv
+
+# Security & Validation
+Flask-Limiter==3.5.0  # Keep specific version if needed, otherwise remove ==3.5.0
+Flask-Talisman
+bleach
+email-validator
+
+# Database & HTTP Requests
+redis
+requests

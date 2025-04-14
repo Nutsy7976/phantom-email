@@ -1,0 +1,51 @@
+/* static/css/style.css */
+:root {
+  --bg-main: #0e0e0e;
+  --header-footer-bg: #111111;
+  --panel-bg: #1a1a1a;
+  --text-default: #f2f2f2;
+  --accent-teal: #00ffff;
+  --accent-green: #00cc99;
+  --hover-green: #00e6b8;
+  --muted-text: #999999;
+  --field-bg: #333333;
+  --field-text: #ffffff;
+  --field-border: #444444;
+  --highlight-red: #ff0000;
+  --link-color: var(--accent-green);
+  --link-hover-color: var(--hover-green);
+  --focus-ring-color: rgba(0, 255, 255, 0.3);
+}
+
+/* Basic body styling using variables */
+body {
+  background-color: var(--bg-main);
+  color: var(--text-default);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--link-hover-color);
+  /* text-decoration: underline; /* Optional */
+}
+
+/* Add specific styles for templates here, referencing variables */
+/* Example: */
+/*
+.container {
+  width: 90%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+*/

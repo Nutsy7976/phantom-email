@@ -1,26 +1,30 @@
-<footer style="background: #f2f2f2; padding: 1.5rem 0; text-align: center; font-family: system-ui, sans-serif; font-size: 14px;">
-  <!-- Language Flags -->
+{# templates/footer.html - Requires Jinja context (url_for) #}
+<footer style="background-color: var(--header-footer-bg); padding: 1.5rem 0; text-align: center; font-size: 14px; color: var(--muted-text); border-top: 1px solid var(--field-border); margin-top: auto;">
+  <!-- Language Flags - Using relative paths or Jinja url_for -->
   <div style="margin-bottom: 0.75rem;">
-  <img src="https://phantom-email-dv4x.onrender.com/static/images/flags/ru.png" alt="RU" width="22">
-  <img src="https://phantom-email-dv4x.onrender.com/static/images/flags/mx.png" alt="MX" width="22">
-  <img src="https://phantom-email-dv4x.onrender.com/static/images/flags/jp.png" alt="JP" width="22">
-  <img src="https://phantom-email-dv4x.onrender.com/static/images/flags/fr.png" alt="FR" width="22">
-  <img src="https://phantom-email-dv4x.onrender.com/static/images/flags/cn.png" alt="CN" width="22">
-  <img src="https://phantom-email-dv4x.onrender.com/static/images/flags/de.png" alt="DE" width="22">
-  <img src="https://phantom-email-dv4x.onrender.com/static/images/flags/ca.png" alt="CA" width="22">
-</div>
-
+      <!-- Example using url_for - requires Flask context -->
+      <img src="{{ url_for('static', filename='images/flags/ru.png') }}" alt="RU" width="22" style="display: inline-block; margin: 0 3px;">
+      <img src="{{ url_for('static', filename='images/flags/mx.png') }}" alt="MX" width="22" style="display: inline-block; margin: 0 3px;">
+      <img src="{{ url_for('static', filename='images/flags/jp.png') }}" alt="JP" width="22" style="display: inline-block; margin: 0 3px;">
+      <img src="{{ url_for('static', filename='images/flags/fr.png') }}" alt="FR" width="22" style="display: inline-block; margin: 0 3px;">
+      <img src="{{ url_for('static', filename='images/flags/cn.png') }}" alt="CN" width="22" style="display: inline-block; margin: 0 3px;">
+      <img src="{{ url_for('static', filename='images/flags/de.png') }}" alt="DE" width="22" style="display: inline-block; margin: 0 3px;">
+      <img src="{{ url_for('static', filename='images/flags/ca.png') }}" alt="CA" width="22" style="display: inline-block; margin: 0 3px;">
+      <!-- Add other flags similarly -->
+  </div>
 
   <!-- Footer Links -->
   <div style="margin-bottom: 0.5rem;">
-    <a href="/about.html">About</a> ·
-    <a href="/terms.html">Terms</a> ·
-    <a href="/contact.html">Contact Publisher</a> ·
-    <a href="/landing">Landing Page</a>
+    <a href="{{ url_for('about') }}">About</a> · <!-- Assuming route name 'about' -->
+    <a href="{{ url_for('terms') }}">Terms</a> · <!-- Assuming route name 'terms' -->
+    <a href="{{ url_for('privacy') }}">Privacy</a> · <!-- Assuming route name 'privacy' -->
+    <a href="{{ url_for('index') }}">Home</a> <!-- Assuming route name 'index' -->
+    <!-- NOTE: Removed Contact Publisher link - recommend removing functionality -->
+    <!-- <a href="{{ url_for('contact') }}">Contact Publisher</a> · -->
   </div>
 
   <!-- Copyright -->
-  <div style="color: #666;">
-    &copy; 2025 Phantom Anonymous Mailer
+  <div style="color: var(--muted-text);">
+    &copy; {% now 'local', '%Y' %} Phantom Privacy Mailer. <!-- Dynamic year -->
   </div>
 </footer>

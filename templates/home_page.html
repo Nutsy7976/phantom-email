@@ -3,232 +3,71 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Phantom - Secure Anonymous Email Service</title>
-    <style>
-        /* Basic Reset & Defaults */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: #121212;
-            color: #e0e0e0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 2rem 0;
-        }
-
-        /* Header */
-        .site-header {
-            padding: 1rem 0;
-            text-align: center; /* Center inline/inline-block elements within */
-        }
-
-        .site-header h1 {
-            font-size: 2rem;
-            margin-top: -1.5rem;
-            color: #00ffff;
-            margin-bottom: 0.5rem; /* Reduced margin slightly */
-            font-weight: 600;
-        }
-
-        /* --- Style for the Logo --- */
-        .header-logo {
-            display: block; /* Make it a block to accept auto margins */
-            margin: 0.5rem auto 1rem auto; /* Top margin, auto L/R margins for centering, bottom margin */
-            max-width: 180px; /* Adjust max width as needed */
-            height: auto; /* Maintain aspect ratio */
-        }
-        /* --- End Logo Style --- */
-
-
-        /* Main Content Area */
-        main {
-            flex-grow: 1;
-            text-align: center;
-        }
-
-        /* Hero Section */
-        .hero {
-            margin-top: -144px;
-            padding: 3rem 0;
-        }
-
-        .hero h2 {
-            font-size: 2.5rem;
-            color: #ffffff;
-            margin-bottom: 1rem;
-            font-weight: 700;
-            letter-spacing: -1px;
-        }
-
-        .hero p {
-            max-width: 650px;
-            margin: 0 auto 2rem auto;
-            font-size: 1.1rem;
-            color: #bdbdbd;
-        }
-
-        /* Features Section */
-        .features {
-            padding: 2rem 0;
-            background-color: #1f1f1f;
-            border-top: 1px solid #333;
-            border-bottom: 1px solid #333;
-        }
-
-        .features h3 {
-            font-size: 1.8rem;
-            color: #00cc99;
-            margin-bottom: 2rem;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            text-align: left;
-        }
-
-        .feature-item {
-            background-color: #2a2a2a;
-            padding: 1.5rem;
-            border-radius: 8px;
-            border-left: 4px solid #00ffff;
-        }
-
-        .feature-item h4 {
-            font-size: 1.2rem;
-            color: #f2f2f2;
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-item p {
-            font-size: 0.95rem;
-            color: #bdbdbd;
-        }
-
-        /* Call to Action Button */
-        .cta-button {
-            display: inline-block;
-            margin-top: 2rem;
-            padding: 0.85rem 2rem;
-            background-color: #00cc99;
-            color: #121212;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .cta-button:hover {
-            background-color: #00e6a8;
-            transform: translateY(-2px);
-        }
-
-        /* Footer */
-        .site-footer {
-            background-color: #0e0e0e;
-            color: #888;
-            text-align: center;
-            padding: 1.5rem 0;
-            margin-top: auto;
-            font-size: 0.9rem;
-            border-top: 1px solid #333;
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-             .hero h2 {
-                font-size: 2rem;
-            }
-            .hero p {
-                font-size: 1rem;
-            }
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-            .header-logo {
-                max-width: 150px; /* Slightly smaller logo on mobile */
-            }
-        }
-
-    </style>
-
+    <title>Phantom - Enhanced Privacy Email Service</title>
+    <!-- Link the stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Optional: Link Google Fonts if needed by style.css -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-        }
-        .fade-in {
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.8s ease-out forwards;
-        }
+        /* Component-specific styles for home_page.html */
+        /* Basic Reset & Defaults - Can be moved to style.css */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        .container { width: 90%; max-width: 960px; margin: 0 auto; padding: 2rem 0; }
+        .site-header { padding: 1rem 0; text-align: center; background-color: var(--header-footer-bg); border-bottom: 1px solid var(--field-border); }
+        .site-header h1 { font-size: 2rem; color: var(--accent-teal); margin-bottom: 0.5rem; font-weight: 600; margin-top: 0; /* Removed negative margin */ }
+        .header-logo { display: block; margin: 0.5rem auto 1rem auto; max-width: 180px; height: auto; }
+        main { flex-grow: 1; text-align: center; }
+        .hero { padding: 3rem 0; /* Removed large negative margin */ }
+        .hero h2 { font-size: 2.5rem; color: var(--accent-teal); margin-bottom: 1rem; font-weight: 700; letter-spacing: -1px; text-shadow: 0 0 4px #00ffff88; }
+        .hero p { max-width: 650px; margin: 0 auto 2rem auto; font-size: 1.1rem; color: var(--muted-text); }
+        .features { padding: 2rem 0; background-color: var(--panel-bg); border-top: 1px solid var(--field-border); border-bottom: 1px solid var(--field-border); }
+        .features h3 { font-size: 1.8rem; color: var(--accent-green); margin-bottom: 2rem; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; text-align: left; }
+        .feature-item { background-color: #2a2a2a; /* Darker panel shade */ padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--accent-teal); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+         .feature-item:hover { transform: translateY(-6px); box-shadow: 0 0 12px rgba(0, 255, 255, 0.2); }
+        .feature-item h4 { font-size: 1.2rem; color: var(--text-default); margin-bottom: 0.5rem; }
+        .feature-item p { font-size: 0.95rem; color: var(--muted-text); }
+        .cta-button { display: inline-block; margin-top: 2rem; padding: 0.85rem 2rem; background-color: var(--accent-green); color: var(--bg-main); text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 1.1rem; transition: background-color 0.3s ease, transform 0.2s ease; border: none; cursor: pointer; box-shadow: 0 0 12px rgba(0, 204, 153, 0.5); }
+        .cta-button:hover { background-color: var(--hover-green); transform: translateY(-2px); }
+        .site-footer { background-color: var(--header-footer-bg); color: var(--muted-text); text-align: center; padding: 1.5rem 0; margin-top: auto; font-size: 0.9rem; border-top: 1px solid var(--field-border); }
+        .site-footer a { color: var(--link-color); margin: 0 10px;}
+        .site-footer a:hover { color: var(--link-hover-color); }
+
+        /* Animations */
+        .fade-in { opacity: 0; transform: translateY(20px); animation: fadeInUp 0.8s ease-out forwards; }
         .fade-in:nth-child(1) { animation-delay: 0.2s; }
         .fade-in:nth-child(2) { animation-delay: 0.4s; }
         .fade-in:nth-child(3) { animation-delay: 0.6s; }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .cta-button {
-            box-shadow: 0 0 12px rgba(0, 204, 153, 0.5);
-        }
-
-        .hero h2 {
-            color: #00ffff;
-            text-shadow: 0 0 4px #00ffff88;
-        }
-
-        .features-grid .feature-item {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .features-grid .feature-item:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 0 12px rgba(0, 255, 255, 0.2);
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+             .hero h2 { font-size: 2rem; }
+             .hero p { font-size: 1rem; }
+             .features-grid { grid-template-columns: 1fr; }
+             .header-logo { max-width: 150px; }
         }
     </style>
-    </head>
+</head>
 <body>
 
     <header class="site-header">
         <div class="container">
+            <img src="{{ url_for('static', filename='images/phantom_logo.png') }}" alt="Phantom Mask Logo" class="header-logo">
             <h1>Phantom</h1>
-            <!-- === ADDED IMAGE HERE === -->
-            <img src="static/images/phantom_logo.png" alt="Phantom logo - white mask icon above the word PHANTOM" class="header-logo">
-            <!-- === END IMAGE === -->
         </div>
     </header>
 
     <main>
         <section class="hero">
             <div class="container">
-                <h2 class="fade-in">Digital Invisibility, On Demand.</h2>
-                <p class="fade-in">
-                    Send completely anonymous, self-destructing emails. We offer spoofed identities,
-                    guarantee no logs, and provide zero tracking. Your privacy is paramount.
+                <h2 class="fade-in">Enhanced Privacy Emailing.</h2>
+                <p class="fade-in fade-in:nth-child(1)">
+                    Send emails with increased anonymity. Designed for privacy-conscious users.
+                    We utilize temporary data handling and a minimal logging policy.
                 </p>
-                <a href="/mailer" class="cta-button">Send Your Anonymous Email</a>
+                <a href="{{ url_for('mailer_form') }}" class="cta-button">Compose Anonymous Email</a>
             </div>
         </section>
 
@@ -237,41 +76,36 @@
                 <h3>Why Choose Phantom?</h3>
                 <div class="features-grid">
                     <div class="feature-item fade-in">
-                        <h4>True Anonymity</h4>
-                        <p class="fade-in">Your identity is masked. Send without revealing your real email or IP address.</p>
+                        <h4>Increased Anonymity</h4>
+                        <p>Designed to mask sender details. Send without revealing your personal email or IP to the recipient via standard headers.</p>
                     </div>
                     <div class="feature-item fade-in">
-                        <h4>Self-Destructing Messages</h4>
-                        <p class="fade-in">Emails can be set to vanish after reading or after a specific time, leaving no trace.</p>
+                        <h4>Temporary Data Handling</h4>
+                        <p>Email details submitted are held temporarily only until payment confirmation and processing. Data is cleared based on our retention policy.</p> <!-- Adjusted wording -->
                     </div>
                     <div class="feature-item fade-in">
-                        <h4>Spoofed Identity</h4>
-                        <p class="fade-in">Appear as someone else (use responsibly!). Ideal for specific scenarios requiring discretion.</p>
+                        <h4>Masked Reply-To Address</h4>
+                        <p>Set a custom Reply-To address for responses, separate from the sending infrastructure (use responsibly!).</p> <!-- Adjusted wording -->
                     </div>
                     <div class="feature-item fade-in">
-                        <h4>Zero Logs Policy</h4>
-                        <p class="fade-in">We don't store records of your activity, messages, or metadata. Period.</p>
+                        <h4>Minimal Logging Policy</h4>
+                        <p>We avoid storing activity logs. Temporary processing data and minimal metadata may exist briefly for operation and abuse prevention.</p> <!-- Adjusted wording -->
                     </div>
                     <div class="feature-item fade-in">
-                        <h4>No Tracking</h4>
-                        <p class="fade-in">Our service includes no tracking pixels or hidden identifiers in your emails.</p>
+                        <h4>No Tracking Pixels</h4>
+                        <p>Emails sent through our service do not include tracking pixels or hidden identifiers by default.</p>
                     </div>
                      <div class="feature-item fade-in">
-                        <h4>Built for Privacy</h4>
-                        <p class="fade-in">Perfect for whistleblowers, journalists, privacy advocates, or just for fun.</p>
+                        <h4>Designed for Privacy</h4>
+                        <p>Useful for journalists, activists, and anyone needing discreet communication channels.</p>
                     </div>
                 </div>
             </div>
         </section>
-
     </main>
 
-    <footer class="site-footer">
-        <div class="container">
-            <p class="fade-in">&copy; 2023 Phantom Services. All Rights Reserved. Use Responsibly.</p>
-            <!-- Add links here if needed: <a href="/privacy">Privacy Policy</a> | <a href="/terms">Terms</a> -->
-        </div>
-    </footer>
+    <!-- Include Footer -->
+    {% include 'footer.html' %}
 
 </body>
 </html>

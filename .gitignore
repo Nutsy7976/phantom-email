@@ -1,5 +1,21 @@
-.venv/
-__pycache__/
-*.pyc
-uploads/
+# .gitignore
+
+# Environment variables
 .env
+
+# Python virtual environment
+venv/
+*/venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files (optional)
+.idea/
+.vscode/
