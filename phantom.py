@@ -71,8 +71,35 @@ def create_checkout_session():
 def thankyou():
     return render_template("thankyou.html")
 
+
 def send_email(from_name, from_email, to_email, message, attachments):
-    print("Sending email:")
+    import smtplib
+    from email.message import EmailMessage
+    import mimetypes
+
+    msg = EmailMessage()
+    msg["Subject"] = "Anonymous Message via Phantom"
+    msg["From"] = f"{from_name} <{from_email}>"
+    msg["To"] = to_email
+    msg.set_content(message)
+
+    for file_path in attachments:
+        try:
+            with open(file_path, "rb") as f:
+                file_data = f.read()
+                maintype, subtype = mimetypes.guess_type(file_path)[0].split("/")
+                msg.add_attachment(file_data, maintype=maintype, subtype=subtype, filename=Path(file_path).name)
+        except Exception as e:
+            print(f"Attachment error: {e}")
+
+    try:
+        with smtplib.SMTP_SSL("smtp.zohocloud.ca", 465) as smtp:
+            smtp.login(os.getenv("SMTP_USERNAME"), os.getenv("SMTP_PASS"))
+            smtp.send_message(msg)
+            print("✅ Email sent successfully")
+    except Exception as e:
+        print(f"❌ Email failed: {e}")
+")
     print("From:", from_name, "<" + from_email + ">")
     print("To:", to_email)
     print("Message:", message)
