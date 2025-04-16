@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Privacy Policy - Phantom</title>
+    <meta name="description" content="Understand how Phantom handles data to provide its enhanced privacy email service." />
+    <link rel="stylesheet" href="/static/css/style.css">
+     <style>
+        /* Keep component-specific styles for privacy.html content */
+        .privacy-content { max-width: 800px; margin: 0 auto; padding: 1rem; line-height: 1.7; } /* Removed top/bottom margin from here */
+        .privacy-content h1 { color: var(--accent-teal); margin-bottom: 1.5rem; border-bottom: 1px solid var(--field-border); padding-bottom: 0.5rem;}
+        .privacy-content h2 { color: var(--accent-green); margin-top: 2rem; margin-bottom: 0.75rem; font-size: 1.2em; }
+        .privacy-content p { margin-bottom: 1rem; color: var(--text-default); }
+        .privacy-content ul { margin-left: 2rem; margin-bottom: 1rem; list-style: disc; padding-left: 1rem;} /* Added padding */
+        .privacy-content ul ul { margin-top: 0.5rem; margin-bottom: 0.5rem; list-style: circle;} /* Nested list style */
+        .privacy-content li { margin-bottom: 0.5rem; }
+        .privacy-content strong { color: var(--text-default); font-weight: 600; }
+        .privacy-content a { color: var(--accent-green); }
+        .privacy-content a:hover { color: var(--hover-green); }
+        .privacy-content code { background-color: var(--panel-bg); padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.9em;}
+        .legal-disclaimer {
+             margin-top: 2.5rem; padding: 1rem; background-color: rgba(255, 26, 26, 0.1);
+             border: 1px solid var(--highlight-red); color: var(--highlight-red);
+             border-radius: 6px; font-size: 0.9em;
+        }
+        .last-updated-privacy { color: var(--muted-text); font-size: 0.9em; margin-bottom: 2rem; display: block;}
+    </style>
+</head>
+<body>
+<!-- Optional: Add standard header -->
+
+<main class="page-container" style="margin-top: 2rem; margin-bottom: 2rem;"> <!-- Added margin to page-container -->
+    <div class="privacy-content">
+        <h1>Privacy Policy</h1>
+        <!-- Use static date or pass from Flask -->
+        <p class="last-updated-privacy">Last Updated: April 15, 2025</p>
+
+        <p>Welcome to <strong>Phantom</strong> ("Service", "we", "us"). We are committed to user privacy. This Privacy Policy explains how we handle information when you use our enhanced privacy email service. Our goal is to minimize data collection and retention while providing the Service effectively and securely.</p>
+
+        <h2>1. Information We Process</h2>
+        <p>Due to the nature of the Service (no user accounts), we process limited information:</p>
+        <ul>
+            <li><strong>User-Provided Information:</strong> When you use the Service, you provide:
+                <ul>
+                    <li>Recipient email address</li>
+                    <li>Subject line</li>
+                    <li>Message body</li>
+                    <li>Optional file attachments</li>
+                    <li>"From Name" (fictitious sender name)</li>
+                    <li>"From Email" (used to set the Reply-To address)</li>
+                </ul>
+                This information is processed solely to facilitate the sending of your email.
+            </li>
+            <li><strong>Payment Information:</strong> Payment processing is handled by our third-party provider, <strong>Stripe</strong>. We do not directly receive or store your full credit card number. Stripe provides us with confirmation of payment success or failure, which may include transaction IDs or masked card details relevant for processing refunds or investigating payment issues. Please review <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer">Stripe's Privacy Policy</a>.</li>
+            <li><strong>Temporary Storage Data:</strong> To link your email details with payment confirmation, validated user-provided information (including message content and base64-encoded attachments) is stored temporarily in our Redis cache, associated with a unique transaction ID. This data is stored with a **Time-To-Live (TTL)** (e.g., ~15-60 minutes, configure as needed) and is automatically deleted after successful processing via the Stripe webhook or upon TTL expiry, whichever comes first.</li>
+            <li><strong>Technical Information (Minimal):</strong>
+                <ul>
+                    <li><strong>IP Address Hashing (for Rate Limiting):</strong> We may process a temporary hash of your IP address solely for the purpose of enforcing rate limits to prevent abuse. This hash is stored temporarily (e.g., for minutes or hours) and is not stored alongside message content or permanently logged in relation to specific emails sent.</li>
+                    <li><strong>Server Logs:</strong> Our web hosting provider (e.g., Render) may maintain standard server logs which might include IP addresses, request times, and browser types for operational and security purposes. We do not actively correlate these logs with specific email content or user identities. These logs are subject to the hosting provider's retention policies.</li>
+                    <li><strong>CAPTCHA Data:</strong> If you interact with a CAPTCHA service (e.g., hCaptcha) on our site, that service processes data according to its own privacy policy to distinguish humans from bots. We receive only a success/failure token from the CAPTCHA provider.</li>
+                </ul>
+            </li>
+        </ul>
+        <p><strong>We do NOT intentionally log or store the content of your emails or attachments long-term after they have been processed for sending.</strong></p>
+
+        <!-- ... (rest of privacy policy content remains the same) ... -->
+         <h2>2. How We Use Information</h2>
+         <!-- ... -->
+         <h2>3. Data Storage and Retention</h2>
+         <!-- ... -->
+         <h2>4. Information Sharing and Disclosure</h2>
+          <!-- ... -->
+         <h2>5. Security Measures</h2>
+          <!-- ... -->
+         <h2>6. Your Choices</h2>
+          <!-- ... -->
+         <h2>7. Children's Privacy</h2>
+          <!-- ... -->
+         <h2>8. Changes to This Privacy Policy</h2>
+          <!-- ... -->
+         <h2>9. Contact Us (Privacy Inquiries)</h2>
+         <p>If you have questions about this Privacy Policy, please contact us at: [Provide an Email Address - e.g., privacy@phantommailer.net]. Please note that due to the nature of the service, our ability to respond regarding specific past uses may be limited.</p>
+
+
+        <div class="legal-disclaimer">
+            <strong>Disclaimer:</strong> This Privacy Policy is for informational purposes and is not legal advice. Consult with a qualified legal professional regarding your specific data handling practices and obligations.
+        </div>
+    </div>
+</main>
+
+<!-- Include footer using Jinja -->
+{% include 'footer.html' %}
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Terms of Use - Phantom</title>
+    <meta name="description" content="Terms of Use for the Phantom anonymous email service." />
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* Keep component-specific styles for terms.html content */
+        .terms-content { max-width: 800px; margin: 0 auto; padding: 1rem; line-height: 1.7; }
+        .terms-content h1 { color: var(--accent-teal); border-bottom: 1px solid var(--field-border); padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+        .terms-content h2 { color: var(--accent-green); margin-top: 2rem; margin-bottom: 0.5rem; font-size: 1.2em; }
+        .terms-content p, .terms-content li { color: var(--text-default); margin-bottom: 1rem; }
+        .terms-content ul { padding-left: 20px; list-style: disc; margin-bottom: 1rem; margin-left: 1rem;} /* Added margin */
+        .terms-content a { color: var(--accent-green); text-decoration: none; }
+        .terms-content a:hover { color: var(--hover-green); }
+        .terms-content strong { color: var(--accent-teal); }
+        .last-updated-terms { color: var(--muted-text); font-size: 0.9em; margin-bottom: 2rem; display: block;}
+    </style>
+</head>
+<body>
+    <!-- Optional: Add standard header -->
+
+    <main class="page-container" style="margin-top: 2rem; margin-bottom: 2rem;"> <!-- Added margin -->
+      <div class="terms-content">
+        <h1>Terms of Use</h1>
+         <!-- Use static date or pass from Flask -->
+        <p class="last-updated-terms">Last Updated: April 15, 2025</p>
+
+        <p>Welcome to Phantom ("the Service"). By accessing or using the Service, you agree to be bound by these Terms of Use ("Terms"). If you do not agree to these Terms, please do not use the Service.</p>
+
+        <h2>1. Description of Service</h2>
+        <p>Phantom provides a platform designed to allow users to send emails with enhanced anonymity by relaying messages through our system and masking certain sender information. Payments are required per message sent and are processed via Stripe.</p>
+
+        <h2>2. Acceptable Use Policy</h2>
+        <p>You agree to use the Service only for lawful and ethical purposes. You are solely responsible for the content of your messages and any consequences arising from sending them. Prohibited uses include, but are not limited to:</p>
+        <ul>
+            <li>Sending spam, unsolicited commercial email, or bulk messages.</li>
+            <li>Engaging in illegal activities, including fraud, phishing, or distributing illegal content.</li>
+            <li>Harassing, threatening, defaming, abusing, or stalking others.</li>
+            <li>Impersonating any person or entity or falsely stating or misrepresenting your affiliation with a person or entity.</li>
+            <li>Distributing viruses, malware, worms, or other harmful code.</li>
+            <li>Violating the intellectual property rights or privacy rights of any third party.</li>
+            <li>Attempting to disrupt or compromise the integrity or security of the Service or related systems.</li>
+        </ul>
+        <p>Violation of this policy may result in immediate blocking from the Service without notice.</p>
+
+        <h2>3. Payments</h2>
+        <p>A fee is required to send each email message. All payments are processed securely by our third-party payment processor, Stripe. We do not store your full credit card details. By initiating a payment, you agree to pay the specified fee. All payments are final and non-refundable unless required by law. You are subject to Stripe's own terms and privacy policy when making payments.</p>
+
+        <h2>4. Anonymity and Privacy</h2>
+        <!-- Corrected link to use standard path -->
+        <p>The Service is designed to enhance user privacy but does not guarantee absolute anonymity. While we take measures like not requiring user accounts and implementing a minimal logging policy (see our <a href="/privacy">Privacy Policy</a>), factors outside our control can affect anonymity (e.g., recipient mail server logging, user's own operational security, content of the message). The "From Email" field you provide sets the `Reply-To` header, allowing recipients to reply to that address; it does not spoof the technical sending address.</p>
+        <p>We handle data temporarily as described in our Privacy Policy.</p>
+
+        <!-- ... (rest of terms content remains the same) ... -->
+        <h2>5. Disclaimers and No Guarantees</h2>
+        <!-- ... -->
+        <h2>6. Limitation of Liability</h2>
+        <!-- ... -->
+        <h2>7. Indemnification</h2>
+        <!-- ... -->
+        <h2>8. Termination</h2>
+        <!-- ... -->
+        <h2>9. Governing Law</h2>
+        <p>These Terms shall be governed and construed in accordance with the laws of [Your Jurisdiction - e.g., State of California, USA], without regard to its conflict of law provisions.</p> <!-- Update Jurisdiction -->
+        <!-- ... -->
+        <h2>10. Changes to Terms</h2>
+        <!-- ... -->
+        <h2>11. Contact</h2>
+        <p>For questions about these Terms, please refer to the information on our About page. [Optional: Add specific contact method if desired, carefully considering privacy implications].</p>
+       </div>
+    </main>
+
+    <!-- Include footer using Jinja -->
+    {% include 'footer.html' %}
+
+</body>
+</html>

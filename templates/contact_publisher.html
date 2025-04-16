@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact Publisher - Phantom</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    /* Specific overrides for centering and form container styling */
+    .contact-form-container {
+      background: var(--panel-bg); /* Use panel bg */
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      margin: 3rem auto;
+      text-align: center;
+    }
+    .contact-form-container h2 { color: var(--accent-teal); margin-bottom: 1.5rem; }
+    /* Inputs/Textarea will inherit from .form-column styles in main CSS if specific enough, or add styles here */
+    .contact-form-container input,
+    .contact-form-container textarea {
+        background-color: var(--field-bg); color: var(--text-default);
+        border: 1px solid var(--field-border); border-radius: 6px;
+        padding: 12px 15px; margin-bottom: 1rem; width: 100%;
+        box-sizing: border-box; font-family: 'Inter', sans-serif; /* Match mailer form */
+    }
+     .contact-form-container input:focus,
+     .contact-form-container textarea:focus {
+        outline: none; border-color: var(--accent-teal);
+        box-shadow: 0 0 0 3px var(--focus-ring-color);
+     }
+    .contact-form-container textarea { min-height: 80px; }
+    /* Button inherits from .button in main CSS */
+    .contact-form-container button { margin-top: 1rem; width: auto; /* Override width if needed */ }
+    .status { margin-top: 1.5rem; font-weight: bold; font-size: 0.95rem;}
+  </style>
+</head>
+<body>
+  <!-- Optional: Add standard header -->
+
+  <main>
+    <div class="contact-form-container">
+      <h2>Contact the Publisher</h2>
+      <!-- Ensure action matches backend route if you implement this -->
+      <form method="POST" action="/contact">
+        <label for="contact_name" class="sr-only">Your First Name</label> <!-- Added label for accessibility -->
+        <input type="text" id="contact_name" name="name" placeholder="Your First Name" required>
+
+        <label for="contact_method" class="sr-only">How can we contact you?</label>
+        <input type="text" id="contact_method" name="method" placeholder="How can we contact you?" required>
+
+        <label for="contact_purpose" class="sr-only">What is this regarding?</label>
+        <textarea id="contact_purpose" name="purpose" rows="4" placeholder="What is this regarding?" required></textarea>
+
+        <button type="submit" class="button">Send Secure Message</button> <!-- Added button class -->
+      </form>
+
+      <!-- Flash message display logic -->
+      {% if success %}
+        <div class="status" style="color: var(--accent-green);">✅ Message sent securely.</div>
+      {% elif error %}
+        <div class="status" style="color: var(--highlight-red);">❌ Error sending message.</div>
+      {% endif %}
+    </div>
+  </main>
+
+  <!-- Include footer using Jinja -->
+  {% include 'footer.html' %}
+</body>
+</html>

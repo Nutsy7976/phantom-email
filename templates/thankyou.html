@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Success - Phantom</title> <!-- Changed title slightly -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Added viewport -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* Keep component-specific styles for thankyou.html */
+        html, body { height: 100%; margin: 0; } /* Ensure body takes full height */
+        body { text-align: center; background-color: var(--bg-main); color: var(--text-default); display: flex; align-items: center; justify-content: center; }
+        .confirmation { background-color: var(--panel-bg); border-radius: 10px; display: inline-block; padding: 30px 50px; box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); animation: fadeIn 1s ease-in-out; border-left: 5px solid var(--accent-green); max-width: 90%; width: 600px; }
+        .confirmation h1 { color: var(--accent-green); font-size: clamp(1.5rem, 4vw, 1.8rem); margin-bottom: 1.5rem;}
+        .confirmation p, .confirmation .note { font-size: clamp(1rem, 3vw, 1.1rem); color: var(--muted-text); margin-top: 1rem; line-height: 1.5;}
+        .confirmation .note.green { color: var(--accent-green); font-weight: bold; }
+        .confirmation a { color: var(--accent-teal); margin-top: 1.5rem; display: inline-block; font-weight: bold; text-decoration: none; } /* Added text-decoration none */
+        .confirmation a:hover { color: var(--accent-teal); text-shadow: 0 0 8px var(--accent-teal); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="confirmation">
+        <!-- You might want to pass a specific message from Flask -->
+        <h1>✅ Success!</h1>
+        <p>Your message is now being processed.</p>
+        <p class="note green">Remember: For your privacy, no confirmation email will be sent.<br>This screen is your only confirmation.</p>
+        <p><a href="/">Return to Home</a></p> <!-- Link to homepage -->
+    </div>
+</body>
+</html>
