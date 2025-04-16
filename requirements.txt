@@ -1,0 +1,6 @@
+Flask
+redis
+requests
+gunicorn # Production web server
+# Add stripe later when you use it:
+# stripe 

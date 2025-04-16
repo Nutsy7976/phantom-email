@@ -1,0 +1,11 @@
+# Exported from Render on 2025-04-16T20:49:57Z
+services:
+- type: keyvalue
+  name: anonmailer
+  plan: free
+  region: oregon
+  maxmemoryPolicy: allkeys-lru
+  ipAllowList:
+  - source: 173.238.172.61/32
+    description: redis
+version: "1"
