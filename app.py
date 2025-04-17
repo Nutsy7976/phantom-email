@@ -1,18 +1,38 @@
-
 import os
-import json
-import uuid
+import logging
+from logging.handlers import SMTPHandler
+
+# ========== Email Alerts via SMTPHandler ==========
+mail_host = os.getenv('ALERT_MAIL_SERVER')
+mail_port = int(os.getenv('ALERT_MAIL_PORT', 25))
+mail_user = os.getenv('ALERT_MAIL_USERNAME')
+mail_pass = os.getenv('ALERT_MAIL_PASSWORD')
+mail_from = os.getenv('ALERT_MAIL_FROM')
+mail_to = os.getenv('ALERT_MAIL_TO', '').split(',')
+mail_use_tls = os.getenv('ALERT_MAIL_USE_TLS', 'false').lower() == 'true'
+
+if mail_host and mail_to:
+    auth = (mail_user, mail_pass) if mail_user and mail_pass else None
+    secure = () if mail_use_tls else None
+    smtp_handler = SMTPHandler(
+        mailhost=(mail_host, mail_port),
+        fromaddr=mail_from,
+        toaddrs=mail_to,
+        subject='Phantom App ERROR',
+        credentials=auth,
+        secure=secure
+    )
+    smtp_handler.setLevel(logging.ERROR)
+    app.logger.addHandler(smtp_handler)
+
 import redis
 import hashlib
 import requests
+import uuid
 import stripe
-import logging
+import json
 from datetime import timedelta
-from flask import Flask, render_template, request, redirect, url_for, flash, abort
-from flask_wtf import CSRFProtect
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from flask_talisman import Talisman
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, logging
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -20,212 +40,267 @@ load_dotenv()
 
 # Flask app setup
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY") or "dev-fallback-secret"
-
-# Security headers via Talisman
-csp = {
-    "default-src": ["'self'"],
-    "script-src": ["'self'", "https://challenges.cloudflare.com"]
-}
-Talisman(app, content_security_policy=csp)
-
-# CSRF protection
-csrf = CSRFProtect(app)
-
-# Rate limiting
-limiter = Limiter(app, key_func=get_remote_address, default_limits=["10 per minute"])
-
-# Logging config
 app.logger.setLevel(logging.INFO)
 
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Unhandled exception: {e}", exc_info=True)
+    flash("An internal error occurred. Please try again later.", "error")
+    return redirect(url_for("mailer")), 500
+
+app.secret_key = os.environ.get('SECRET_KEY') or 'dev-fallback-secret'
+
 # Redis setup
-redis_url = os.getenv("REDIS_URL")
+redis_url = os.environ.get('REDIS_URL')
 redis_client = None
 if redis_url:
     try:
         redis_client = redis.from_url(redis_url)
     except Exception as e:
-        app.logger.error(f"Redis connection error: {e}", exc_info=True)
+        print(f"Error connecting to Redis: {e}")
+        print("Warning: Redis-dependent features will not work locally if connection fails.")
 else:
-    app.logger.warning("REDIS_URL not set; Redis disabled")
+    print("Warning: REDIS_URL not set; Redis features disabled.")
 
-# Stripe config
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
+# Service configurations
+MAILGUN_API_KEY        = os.environ.get('MAILGUN_API_KEY')
+MAILGUN_DOMAIN         = os.environ.get('MAILGUN_DOMAIN')
+STRIPE_SECRET_KEY      = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
+STRIPE_WEBHOOK_SECRET  = os.environ.get('STRIPE_WEBHOOK_SECRET')
+
 if STRIPE_SECRET_KEY:
     stripe.api_key = STRIPE_SECRET_KEY
 else:
-    app.logger.warning("STRIPE_SECRET_KEY not set; paid flow disabled")
+    print("Warning: STRIPE_SECRET_KEY not set; paid flow disabled.")
 
 
 def verify_turnstile(token, remoteip=None):
+    """Verify Cloudflare Turnstile token server-side."""
     secret = os.getenv("TURNSTILE_SECRET_KEY")
     if not secret or not token:
         return False
-    data = {"secret": secret, "response": token}
+    payload = {"secret": secret, "response": token}
     if remoteip:
-        data["remoteip"] = remoteip
+        payload["remoteip"] = remoteip
     try:
-        r = requests.post("https://challenges.cloudflare.com/turnstile/v0/siteverify", data=data)
+        r = requests.post(
+            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+            data=payload
+        )
         return r.ok and r.json().get("success", False)
     except Exception as e:
-        app.logger.error(f"Turnstile error: {e}", exc_info=True)
+        print(f"Turnstile verification error: {e}")
         return False
 
 
 def allowed_file(filename):
-    ALLOWED_EXT = {'txt','pdf','png','jpg','jpeg','gif'}
-    return '.' in filename and filename.rsplit('.',1)[1].lower() in ALLOWED_EXT
+    """Return True if the file has an allowed extension."""
+    ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def send_email_via_mailgun(recipient, subject, body, from_name, reply_to_email, attachments=None):
-    MAILGUN_KEY = os.getenv("MAILGUN_API_KEY")
-    MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
-    if not MAILGUN_KEY or not MAILGUN_DOMAIN:
-        app.logger.error("Mailgun not configured")
+    if not MAILGUN_API_KEY or not MAILGUN_DOMAIN:
+        print("Mailgun credentials missing; cannot send email.")
         return False
     url = f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages"
-    auth = ('api', MAILGUN_KEY)
-    html_body = render_template('email.html', subject=subject, body=body, from_name=from_name)
+    auth = ('api', MAILGUN_API_KEY)
     data = {
         "from": f"{from_name} <sender@{MAILGUN_DOMAIN}>",
         "to": [recipient],
         "subject": subject,
         "text": body,
-        "html": html_body,
         "h:Reply-To": reply_to_email
     }
+    # Render HTML email template
+    html_body = render_template('email.html',
+        subject=subject,
+        body=body,
+        from_name=from_name,
+    )
+    data['html'] = html_body
     files = attachments or []
     try:
         resp = requests.post(url, auth=auth, data=data, files=files)
         resp.raise_for_status()
         return True
     except Exception as e:
-        app.logger.error(f"Mailgun send error: {e}", exc_info=True)
+        print(f"Error sending via Mailgun: {e}")
         return False
 
 
-# Basic routes
+# --- Basic page routes ---
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/mailer')
 def mailer():
+    # Pass Turnstile sitekey into template
     sitekey = os.getenv("TURNSTILE_SITE_KEY")
     return render_template('mailer.html', turnstile_sitekey=sitekey)
 
-# Health check
-@app.route('/healthz')
-def healthz():
-    try:
-        if redis_client:
-            redis_client.ping()
-        else:
-            return ('',503)
-    except Exception as e:
-        app.logger.error(f"Health error: {e}", exc_info=True)
-        return ('',503)
-    return ('',200)
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
-# Payment & email route
-@app.route('/start-payment', methods=['POST'])
-@limiter.limit("5 per minute")
-@csrf.exempt  # CSRF token required in form
-def start_payment():
-    # CSRFProtect will validate token automatically
-    token = request.form.get("cf-turnstile-response")
-    if not verify_turnstile(token, request.remote_addr):
-        flash("CAPTCHA failed","error")
-        return redirect(url_for('mailer'))
+@app.route('/terms')
+def terms():
+    return render_template('terms.html')
 
-    fn = request.form.get('from_name','').strip()
-    fe = request.form.get('from_email','').strip()
-    te = request.form.get('to_email','').strip()
-    subj = request.form.get('subject','').strip()
-    msg = request.form.get('message','').strip()
-
-    # Input validation
-    if not (1 <= len(subj) <= 100):
-        flash("Subject length must be 1-100 chars","error"); return redirect(url_for('mailer'))
-    if not (1 <= len(msg) <= 2000):
-        flash("Message length must be 1-2000 chars","error"); return redirect(url_for('mailer'))
-
-    attachments = []
-    for key in ('file1','file2'):
-        f = request.files.get(key)
-        if f and allowed_file(f.filename):
-            attachments.append(('attachment',(f.filename,f.stream,f.mimetype)))
-
-    free = 'free_trial' in request.form
-    if free:
-        ip = request.remote_addr
-        h = hashlib.sha256(ip.encode()).hexdigest()
-        key = f"free_trial_ip:{h}"
-        if redis_client and redis_client.exists(key):
-            flash("Free trial used","error"); return redirect(url_for('mailer'))
-        if send_email_via_mailgun(te,subj,msg,fn,fe,attachments):
-            if redis_client:
-                redis_client.setex(key, timedelta(days=1),"used")
-            return redirect(url_for('thankyou'))
-        flash("Send failed","error"); return redirect(url_for('mailer'))
-
-    if not STRIPE_SECRET_KEY:
-        flash("Payment unavailable","error"); return redirect(url_for('mailer'))
-
-    eid = str(uuid.uuid4())
-    data_key = f"email:{eid}"
-    payload = {"to_email":te,"subject":subj,"message":msg,"from_name":fn,"from_email":fe}
-    if redis_client: redis_client.setex(data_key, timedelta(hours=36), json.dumps(payload))
-    try:
-        sess = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{'price_data':{'currency':'usd','product_data':{'name':subj},'unit_amount':100},'quantity':1}],
-            mode='payment',
-            success_url=url_for('thankyou',_external=True),
-            cancel_url=url_for('mailer',_external=True),
-            metadata={'redis_email_key':data_key}
-        )
-        return redirect(sess.url, code=303)
-    except Exception as e:
-        app.logger.error(f"Stripe session error: {e}", exc_info=True)
-        if redis_client: redis_client.delete(data_key)
-        flash("Payment error","error"); return redirect(url_for('mailer'))
-
-# Webhook handler
-@app.route('/stripe-webhook', methods=['POST'])
-def stripe_webhook():
-    payload = request.get_data()
-    sig = request.headers.get('Stripe-Signature')
-    try:
-        event = stripe.Webhook.construct_event(payload, sig, STRIPE_WEBHOOK_SECRET)
-    except Exception as e:
-        app.logger.warning(f"Webhook verify failed: {e}")
-        abort(400)
-    if event['type']=="checkout.session.completed":
-        sess = event['data']['object']
-        key = sess.get('metadata',{}).get('redis_email_key')
-        if key and redis_client:
-            raw = redis_client.get(key)
-            if raw:
-                try:
-                    payload = json.loads(raw)
-                    send_email_via_mailgun(payload['to_email'],payload['subject'],payload['message'],payload['from_name'],payload['from_email'])
-                    redis_client.delete(key)
-                except Exception as e:
-                    app.logger.error(f"Webhook handler error: {e}", exc_info=True)
-                    abort(500)
-    return ('',200)
-
-@app.errorhandler(Exception)
-def handle_exception(e):
-    app.logger.error(f"Unhandled exception: {e}", exc_info=True)
-    flash("Internal error","error")
-    return redirect(url_for('mailer')), 500
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
 
 @app.route('/thankyou')
 def thankyou():
     return render_template('thankyou.html')
 
-if __name__=='__main__':
-    app.run(host='0.0.0.0', port=int(os.getenv('PORT',5000)), debug=os.getenv('FLASK_DEBUG','false')=='true')
+
+# --- Payment and email submission ---
+
+@app.route('/start-payment', methods=['POST'])
+def start_payment():
+    if request.method != 'POST':
+        return redirect(url_for('mailer'))
+
+    # 1. CAPTCHA validation
+    token = request.form.get("cf-turnstile-response")
+    client_ip = request.remote_addr
+    if not verify_turnstile(token, client_ip):
+        flash("CAPTCHA verification failed", "error")
+        return redirect(url_for("mailer"))
+
+    # 2. Read form fields
+    fn   = request.form.get('from_name')
+    fe   = request.form.get('from_email')
+    te   = request.form.get('to_email')
+    subj = request.form.get('subject')
+    msg  = request.form.get('message')
+    free = 'free_trial' in request.form
+
+    # 3. Collect attachments
+    attachments = []
+    for key in ('file1', 'file2'):
+        f = request.files.get(key)
+        if f and allowed_file(f.filename):
+            attachments.append((
+                'attachment',
+                (f.filename, f.stream, f.mimetype)
+            ))
+
+    # 4. Free‑trial branch
+    if free:
+        ip = client_ip or request.environ.get('HTTP_X_FORWARDED_FOR')
+        if not ip:
+            flash('IP error', 'error')
+            return redirect(url_for('mailer'))
+        h   = hashlib.sha256(ip.encode()).hexdigest()
+        key = f"free_trial_ip:{h}"
+        used = redis_client.exists(key) if redis_client else False
+        if used:
+            flash('Free trial limit reached', 'error')
+            return redirect(url_for('mailer'))
+        ok = send_email_via_mailgun(te, subj, msg, fn, fe, attachments)
+        if ok:
+            if redis_client:
+                redis_client.setex(key, timedelta(days=1), "used")
+            return redirect(url_for('thankyou'))
+        flash('Send failed', 'error')
+        return redirect(url_for('mailer'))
+
+    # 5. Paid branch
+    if not STRIPE_SECRET_KEY:
+        flash('Payment unavailable', 'error')
+        return redirect(url_for('mailer'))
+
+    eid = str(uuid.uuid4())
+    meta = {'redis_email_key': f"email:{eid}"}
+    data = {"to_email": te, "subject": subj, "message": msg, "from_name": fn, "from_email": fe}
+    if redis_client:
+        redis_client.setex(meta['redis_email_key'], timedelta(minutes=60), json.dumps(data))
+
+    try:
+        sess = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {'name': subj},
+                    'unit_amount': 100
+                },
+                'quantity': 1
+            }],
+            mode='payment',
+            success_url=url_for('thankyou', _external=True),
+            cancel_url=url_for('mailer', _external=True),
+            metadata=meta
+        )
+        return redirect(sess.url, code=303)
+    except Exception as e:
+        print(f"Stripe error: {e}")
+        if redis_client:
+            redis_client.delete(meta['redis_email_key'])
+        flash('Payment error', 'error')
+        return redirect(url_for('mailer'))
+
+
+# --- Stripe webhook handler ---
+
+@app.route('/stripe-webhook', methods=['POST'])
+def stripe_webhook():
+    payload = request.get_data(as_text=False)
+    sig_header = request.headers.get('Stripe-Signature')
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    except ValueError:
+        print("Invalid payload")
+        abort(400)
+    except stripe.error.SignatureVerificationError:
+        print("Invalid signature")
+        abort(400)
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        key = session.get("metadata", {}).get("redis_email_key")
+        if key and redis_client:
+            raw = redis_client.get(key)
+            if raw:
+                try:
+                    email_data = json.loads(raw)
+                    send_email_via_mailgun(
+                        email_data["to_email"],
+                        email_data["subject"],
+                        email_data["message"],
+                        email_data["from_name"],
+                        email_data["from_email"],
+                        # You’ll need to store attachments in metadata if you want to resend them
+                    )
+                    redis_client.delete(key)
+                except Exception as e:
+                    print(f"Error processing webhook: {e}")
+                    abort(500)
+
+    return ("", 200)
+
+
+
+@app.route('/healthz')
+def healthz():
+    """Health check endpoint for Render."""
+    try:
+        if redis_client:
+            redis_client.ping()
+        else:
+            return ('', 503)
+    except Exception as e:
+        app.logger.error(f'Healthcheck Redis ping failed: {e}', exc_info=True)
+        return ('', 503)
+    return ('', 200)
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    debug_mode = os.environ.get('FLASK_DEBUG', 'true').lower() == 'true'
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)
