@@ -1,30 +1,4 @@
 import os
-import logging
-from logging.handlers import SMTPHandler
-
-# ========== Email Alerts via SMTPHandler ==========
-mail_host = os.getenv('ALERT_MAIL_SERVER')
-mail_port = int(os.getenv('ALERT_MAIL_PORT', 25))
-mail_user = os.getenv('ALERT_MAIL_USERNAME')
-mail_pass = os.getenv('ALERT_MAIL_PASSWORD')
-mail_from = os.getenv('ALERT_MAIL_FROM')
-mail_to = os.getenv('ALERT_MAIL_TO', '').split(',')
-mail_use_tls = os.getenv('ALERT_MAIL_USE_TLS', 'false').lower() == 'true'
-
-if mail_host and mail_to:
-    auth = (mail_user, mail_pass) if mail_user and mail_pass else None
-    secure = () if mail_use_tls else None
-    smtp_handler = SMTPHandler(
-        mailhost=(mail_host, mail_port),
-        fromaddr=mail_from,
-        toaddrs=mail_to,
-        subject='Phantom App ERROR',
-        credentials=auth,
-        secure=secure
-    )
-    smtp_handler.setLevel(logging.ERROR)
-    app.logger.addHandler(smtp_handler)
-
 import redis
 import hashlib
 import requests
@@ -32,8 +6,9 @@ import uuid
 import stripe
 import json
 from datetime import timedelta
-from flask import Flask, render_template, request, redirect, url_for, flash, abort, logging
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from dotenv import load_dotenv
+import logging
 
 # Load environment variables
 load_dotenv()
