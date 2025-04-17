@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>{{ subject }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #333; }
+    .header { background: #eee; padding: 10px; text-align: center; }
+    .content { padding: 20px; }
+    .footer { background: #eee; padding: 10px; text-align: center; font-size: 0.8em; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>Phantom Anonymous Mailer</h2>
+    <p>From: {{ from_name }}</p>
+  </div>
+  <div class="content">
+    <h3>{{ subject }}</h3>
+    <p>{{ body }}</p>
+  </div>
+  <div class="footer">
+    <p>This email was sent anonymously via Phantom.</p>
+  </div>
+</body>
+</html>

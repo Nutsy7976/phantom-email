@@ -6,8 +6,7 @@ import uuid
 import stripe
 import json
 from datetime import timedelta
-from flask import Flask, render_template, request, redirect, url_for, flash, abort
-import logging
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, logging
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -16,6 +15,13 @@ load_dotenv()
 # Flask app setup
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Unhandled exception: {e}", exc_info=True)
+    flash("An internal error occurred. Please try again later.", "error")
+    return redirect(url_for("mailer")), 500
+
 app.secret_key = os.environ.get('SECRET_KEY') or 'dev-fallback-secret'
 
 # Redis setup
@@ -25,10 +31,10 @@ if redis_url:
     try:
         redis_client = redis.from_url(redis_url)
     except Exception as e:
-        app.logger.error(f"Error connecting to Redis: {e}")
+        print(f"Error connecting to Redis: {e}")
         print("Warning: Redis-dependent features will not work locally if connection fails.")
 else:
-    app.logger.warning("Warning: REDIS_URL not set; Redis features disabled.")
+    print("Warning: REDIS_URL not set; Redis features disabled.")
 
 # Service configurations
 MAILGUN_API_KEY        = os.environ.get('MAILGUN_API_KEY')
@@ -40,7 +46,7 @@ STRIPE_WEBHOOK_SECRET  = os.environ.get('STRIPE_WEBHOOK_SECRET')
 if STRIPE_SECRET_KEY:
     stripe.api_key = STRIPE_SECRET_KEY
 else:
-    app.logger.warning("Warning: STRIPE_SECRET_KEY not set; paid flow disabled.")
+    print("Warning: STRIPE_SECRET_KEY not set; paid flow disabled.")
 
 
 def verify_turnstile(token, remoteip=None):
@@ -58,7 +64,7 @@ def verify_turnstile(token, remoteip=None):
         )
         return r.ok and r.json().get("success", False)
     except Exception as e:
-        app.logger.error(f"Turnstile verification error: {e}")
+        print(f"Turnstile verification error: {e}")
         return False
 
 
@@ -81,13 +87,20 @@ def send_email_via_mailgun(recipient, subject, body, from_name, reply_to_email, 
         "text": body,
         "h:Reply-To": reply_to_email
     }
+    # Render HTML email template
+    html_body = render_template('email.html',
+        subject=subject,
+        body=body,
+        from_name=from_name,
+    )
+    data['html'] = html_body
     files = attachments or []
     try:
         resp = requests.post(url, auth=auth, data=data, files=files)
         resp.raise_for_status()
         return True
     except Exception as e:
-        app.logger.error(f"Error sending via Mailgun: {e}")
+        print(f"Error sending via Mailgun: {e}")
         return False
 
 
@@ -217,10 +230,10 @@ def stripe_webhook():
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
     except ValueError:
-        app.logger.warning("Webhook invalid payload")
+        print("Invalid payload")
         abort(400)
     except stripe.error.SignatureVerificationError:
-        app.logger.warning("Webhook signature verification failed")
+        print("Invalid signature")
         abort(400)
 
     if event["type"] == "checkout.session.completed":
@@ -241,11 +254,25 @@ def stripe_webhook():
                     )
                     redis_client.delete(key)
                 except Exception as e:
-                    app.logger.error(f"Error processing webhook: {e}")
+                    print(f"Error processing webhook: {e}")
                     abort(500)
 
     return ("", 200)
 
+
+
+@app.route('/healthz')
+def healthz():
+    """Health check endpoint for Render."""
+    try:
+        if redis_client:
+            redis_client.ping()
+        else:
+            return ('', 503)
+    except Exception as e:
+        app.logger.error(f'Healthcheck Redis ping failed: {e}', exc_info=True)
+        return ('', 503)
+    return ('', 200)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
