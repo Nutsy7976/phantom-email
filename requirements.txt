@@ -1,6 +1,6 @@
 Flask
 redis
 requests
-gunicorn # Production web server
-# Add stripe later when you use it:
-# stripe 
+gunicorn
+stripe 
+# Add any others you are using, like python-dotenv if needed
