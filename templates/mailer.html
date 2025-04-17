@@ -6,7 +6,8 @@
     <title>Compose Email - Phantom Anonymous Emailer</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- TODO: Add CAPTCHA script includes -->
+    <!-- CAPTCHA script include -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
     <header class="page-header">
@@ -89,8 +90,8 @@
                             <!-- === END CHECKBOX MOVE === -->
 
                             <!-- TODO: Add CAPTCHA Widget Here -->
-                            <div class="captcha-placeholder">
-                               [CAPTCHA Challenge Will Appear Here]
+                            <div class="cf-turnstile" data-sitekey="{{ turnstile_sitekey }}">
+                               
                             </div>
 
                             <button type="submit" class="button">
