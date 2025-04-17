@@ -1,6 +1,6 @@
 Flask
 redis
 requests
+stripe
+python-dotenv
 gunicorn
-stripe 
-# Add any others you are using, like python-dotenv if needed
