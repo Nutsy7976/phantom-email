@@ -1,4 +1,7 @@
 Flask
+flask-wtf
+flask-limiter
+flask-talisman
 redis
 requests
 stripe

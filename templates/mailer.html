@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,117 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compose Email - Phantom Anonymous Emailer</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- CAPTCHA script include -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
-    <header class="page-header">
-        <span>Anonymous Email by Phantom</span>
-    </header>
-
     <main>
-        <section class="main-content-section">
-            <div class="mailer-page-container">
-                <div class="columns-container">
-
-                    <!-- Left Column: Features -->
-                    <div class="column features-list fade-in">
-                        <h3>Phantom Features</h3>
-                        <ul>
-                            <li>No accounts or signups required</li>
-                            <li>Minimal logging policy for privacy</li>
-                            <li>Temporary data handling & deletion</li>
-                            <li>Customizable Reply-To address</li>
-                            <li>Secure connection (HTTPS/TLS)</li>
-                            <li>Designed for enhanced anonymity</li>
-                            <li>Simple flat-fee payment via Stripe</li>
-                            <li>File attachments supported (up to 5MB)</li>
-                        </ul>
-                         <p class="price-note">
-                            A flat fee of <strong>$3.00 USD</strong> applies per email sent.
-                         </p>
-                         <!-- === CHECKBOX IS *REMOVED* FROM HERE === -->
-                    </div>
-
-                    <!-- Right Column: Form -->
-                    <div class="column form-column fade-in">
-                        <h1>Compose Anonymous Email</h1>
-
-                        <!-- Flash Messages Placeholder -->
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                          {% if messages %}
-                            <ul class="flash-messages">
-                            {% for category, message in messages %}
-                              <li class="{{ category }}">{{ message }}</li>
-                            {% endfor %}
-                            </ul>
-                          {% endif %}
-                        {% endwith %}
-
-
-                        <form action="/start-payment" enctype="multipart/form-data" method="post">
-
-                            <label for="from_name">Sender Name (Fictitious):</label>
-                            <input name="from_name" id="from_name" placeholder="e.g., Concerned Citizen" required type="text"/>
-
-                            <label for="from_email">Sender Email (Sets Reply-To):</label>
-                            <input name="from_email" id="from_email" placeholder="e.g., reply-receiver@mail.com" required type="email"/>
-                            <small>Recipient replies will go here. This is *not* your real address.</small>
-
-                            <label for="to_email">Recipient's Email:</label>
-                            <input name="to_email" id="to_email" placeholder="Recipient's actual email address" required type="email"/>
-
-                            <label for="subject">Subject:</label>
-                            <input name="subject" id="subject" placeholder="Email Subject Line" required type="text"/>
-
-                            <label for="message">Message:</label>
-                            <textarea name="message" id="message" placeholder="Your anonymous message..." required rows="7"></textarea>
-
-                            <label for="file1">Optional Attachment 1:</label>
-                            <input name="file1" id="file1" type="file"/>
-
-                            <label for="file2">Optional Attachment 2:</label>
-                            <input name="file2" id="file2" type="file"/>
-                            <small>Max total size: 5 MB. Allowed types: txt, pdf, png, jpg, etc.</small>
-
-                            <!-- === CHECKBOX IS *MOVED* TO HERE (Inside the <form>) === -->
-                            <div class="free-trial-container" style="text-align: left; margin-bottom: 1.5rem; border-style: solid; background: none;">
-                                <!-- Adjusted style for better fit within form -->
-                                 <input type="checkbox" id="free-trial-checkbox" name="free_trial" value="true">
-                                 <label for="free-trial-checkbox">
-                                     Try 1 <span class="free-trial-highlight">FREE</span> email
-                                 </label>
-                             </div>
-                            <!-- === END CHECKBOX MOVE === -->
-
-                            <!-- TODO: Add CAPTCHA Widget Here -->
-                            <div class="cf-turnstile" data-sitekey="{{ turnstile_sitekey }}">
-                               
-                            </div>
-
-                            <button type="submit" class="button">
-                                Proceed to Send Email
-                            </button>
-                        </form> <!-- End of form -->
-                    </div> <!-- End Form Column -->
-
-                </div> <!-- End Columns Container -->
-            </div> <!-- End Mailer Page Container -->
-        </section>
+        <form action="/start-payment" enctype="multipart/form-data" method="post">
+            {{ csrf_token() }}
+            <label for="from_name">Sender Name:</label>
+            <input name="from_name" id="from_name" required type="text" maxlength="50"/>
+            <label for="from_email">Sender Email:</label>
+            <input name="from_email" id="from_email" required type="email" maxlength="100"/>
+            <label for="to_email">Recipient Email:</label>
+            <input name="to_email" id="to_email" required type="email" maxlength="100"/>
+            <label for="subject">Subject:</label>
+            <input name="subject" id="subject" required type="text" maxlength="100"/>
+            <label for="message">Message:</label>
+            <textarea name="message" id="message" required rows="7" maxlength="2000"></textarea>
+            <label for="file1">Attachment 1:</label>
+            <input name="file1" id="file1" type="file"/>
+            <label for="file2">Attachment 2:</label>
+            <input name="file2" id="file2" type="file"/>
+            <div class="cf-turnstile" data-sitekey="{{ turnstile_sitekey }}"></div>
+            <button type="submit">Send Email</button>
+        </form>
     </main>
-
-    <!-- Standard Footer Structure -->
-    <footer>
-        <div class="page-container">
-             <nav>
-                <a href="/about">About Us</a>
-                <a href="/terms">Terms of Service</a>
-                <a href="/privacy">Privacy Policy</a>
-            </nav>
-            <p>&copy; <script>document.write(new Date().getFullYear())</script> Phantom Anonymous Emailer. All Rights Reserved.</p>
-        </div>
-    </footer>
-
 </body>
 </html>
