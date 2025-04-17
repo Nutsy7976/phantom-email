@@ -6,8 +6,9 @@ import uuid
 import stripe
 import json
 from datetime import timedelta
-from flask import Flask, render_template, request, redirect, url_for, flash, abort, logging
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from dotenv import load_dotenv
+import logging
 
 # Load environment variables
 load_dotenv()
