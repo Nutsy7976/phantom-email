@@ -3,7 +3,8 @@ import os
 import redis
 import hashlib
 import requests # For Mailgun API calls
-import uuid # <-- For generating unique IDs
+import uuid     # For generating unique IDs
+import stripe   # <-- For Stripe integration
 from datetime import timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash
 
@@ -29,6 +30,17 @@ else:
 MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY')
 MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN')
 
+# --- Stripe Configuration ---
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY') # Needed later for frontend elements if any
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET') # Needed for webhook handler
+
+if not STRIPE_SECRET_KEY:
+    print("Warning: STRIPE_SECRET_KEY environment variable not set. Payment processing will fail.")
+else:
+    stripe.api_key = STRIPE_SECRET_KEY # Set the key for the stripe library
+    print("Stripe API Key configured.")
+
 # --- Real Mailgun Function ---
 def send_email_via_mailgun(recipient, subject, body, from_name, reply_to_email, attachments=None):
     """Sends an email using the Mailgun API."""
@@ -38,20 +50,20 @@ def send_email_via_mailgun(recipient, subject, body, from_name, reply_to_email, 
     mailgun_url = f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages"
     auth = ('api', MAILGUN_API_KEY)
     # Use a consistent sender address that Mailgun is verified for
-    sender_email = f"sender@{MAILGUN_DOMAIN}" 
+    sender_email = f"sender@{MAILGUN_DOMAIN}" # Change 'sender' if needed
     from_header = f"{from_name} <{sender_email}>"
-    
+
     data = {
-        "from": from_header, 
-        "to": [recipient], 
+        "from": from_header,
+        "to": [recipient],
         "subject": subject,
-        "text": body, 
+        "text": body,
         "h:Reply-To": reply_to_email # Mailgun uses 'h:Header-Name' for custom headers
     }
-    
+
     # TODO: Implement file attachment handling for Mailgun
     files = None # This needs to be structured correctly for requests library files parameter
-    
+
     print(f"Sending email via Mailgun to {recipient} from {from_header} (Reply-To: {reply_to_email})")
     try:
         response = requests.post(mailgun_url, auth=auth, data=data, files=files)
@@ -130,7 +142,7 @@ def start_payment():
             redis_key = f"free_trial_ip:{ip_hash}"
             block_duration = timedelta(days=1) # Limit to 1 per day
 
-            try: 
+            try:
                 if redis_client.exists(redis_key):
                     print(f"Free trial limit reached for IP hash: {ip_hash[:10]}...")
                     flash('Free trial limit reached for your network (limit 1 per day). Please uncheck the box or try again later.', 'error')
@@ -158,15 +170,15 @@ def start_payment():
                 except redis.exceptions.ConnectionError as e:
                      print(f"Redis Error during setex after sending free email: {e}")
                      # Email was sent, but log the warning
-                     flash('Free email sent, but usage recording failed.', 'warning') 
+                     flash('Free email sent, but usage recording failed.', 'warning')
                      return redirect(url_for('thankyou')) # Still redirect to thank you
             else:
                 # Mailgun sending failed
                 flash('Failed to send free email via provider. Please try again later.', 'error')
                 return redirect(url_for('mailer'))
-        
+
         else:
-            # --- PAID FLOW LOGIC (Step 1: Store in Redis) --- # <-- THIS IS THE UPDATED SECTION
+            # --- PAID FLOW LOGIC (Store in Redis -> Create Stripe Session -> Redirect) --- #
             print("Handling PAID request...")
 
             if not redis_client:
@@ -174,8 +186,13 @@ def start_payment():
                 flash('Payment system is temporarily unavailable.', 'error')
                 return redirect(url_for('mailer'))
 
+            if not STRIPE_SECRET_KEY:
+                print("Error: Stripe secret key not configured. Cannot process payment.")
+                flash('Payment system configuration error.', 'error')
+                return redirect(url_for('mailer'))
+
             # 1. Create a unique ticket number (ID)
-            email_id = str(uuid.uuid4()) 
+            email_id = str(uuid.uuid4())
             print(f"Generated unique Email ID: {email_id}")
 
             # 2. Gather the email details from the form
@@ -186,29 +203,65 @@ def start_payment():
                 "from_name": from_name,
                 "from_email": from_email # Reply-To address
                 # TODO: Add file handling info here later
-                # "attachments": [ {'filename': 'doc.pdf', 'temp_path': '/tmp/xyz.pdf', 'content_type': 'application/pdf'} ] 
             }
 
             # 3. Store these details in Redis using the ID as the key
             redis_key = f"email:{email_id}"
-            # Store it for 60 minutes (3600 seconds). Adjust if needed.
-            storage_duration = timedelta(minutes=60) 
+            storage_duration = timedelta(minutes=60) # Store for 1 hour
 
             try:
-                # For now, store as a simple string. Later we might use JSON.
-                # Note: Storing large messages/files directly as strings isn't ideal
-                data_to_store = str(email_data) 
-                
+                # Store as a simple string for now. Consider JSON later.
+                data_to_store = str(email_data)
                 redis_client.setex(redis_key, storage_duration, data_to_store)
                 print(f"Stored email data in Redis with key: {redis_key} for {storage_duration.total_seconds()} seconds")
 
-                # --- Placeholder for Next Step (Stripe Integration) ---
-                print("TODO: Implement Stripe Checkout Session creation and redirect here.")
-                flash('Data stored, ready for Stripe payment! (Stripe integration needed)', 'info') # Temp message
-                # For now, just redirect back to the mailer page. 
-                # **** THIS redirect WILL BE REPLACED by the redirect to Stripe ****
-                return redirect(url_for('mailer')) 
-                # --- End Placeholder ---
+                # 4. --- Create Stripe Checkout Session ---
+                print("Creating Stripe Checkout session...")
+                try:
+                    # Define success and cancel URLs dynamically
+                    success_url = url_for('thankyou', _external=True)
+                    cancel_url = url_for('mailer', _external=True)
+
+                    checkout_session = stripe.checkout.Session.create(
+                        line_items=[
+                            {
+                                'price_data': {
+                                    'currency': 'usd',
+                                    'product_data': {
+                                        'name': 'Anonymous Email Service',
+                                    },
+                                    'unit_amount': 300, # $3.00 in cents
+                                },
+                                'quantity': 1,
+                            },
+                        ],
+                        mode='payment',
+                        success_url=success_url,
+                        cancel_url=cancel_url,
+                        # --- Pass the Redis key to metadata ---
+                        metadata={
+                            'redis_email_key': redis_key # Used by webhook later
+                        }
+                        # --- End Metadata ---
+                    )
+                    print(f"Stripe Checkout session created: {checkout_session.id}")
+
+                    # --- 5. Redirect user to Stripe ---
+                    return redirect(checkout_session.url, code=303)
+                    # --- End Redirect ---
+
+                except Exception as e:
+                    print(f"Error creating Stripe session: {e}")
+                    flash(f'Could not initiate payment process: {e}', 'error')
+                    # Clean up Redis key if Stripe failed after storing
+                    try:
+                        if redis_client:
+                            redis_client.delete(redis_key)
+                            print(f"Cleaned up Redis key {redis_key} due to Stripe error.")
+                    except Exception as redis_del_e:
+                         print(f"Error cleaning up Redis key {redis_key}: {redis_del_e}")
+                    return redirect(url_for('mailer'))
+                # --- End Stripe Checkout Session Creation ---
 
             except redis.exceptions.ConnectionError as e:
                 print(f"Redis Error during setex for paid email: {e}")
@@ -218,15 +271,19 @@ def start_payment():
                 print(f"An unexpected error occurred storing data for paid email: {e}")
                 flash('An unexpected error occurred. Please try again.', 'error')
                 return redirect(url_for('mailer'))
-            # --- End of PAID FLOW LOGIC (Step 1) ---
+            # --- End of PAID FLOW LOGIC ---
 
     # If GET request, redirect away
     return redirect(url_for('mailer'))
 
+# --- TODO: Add Stripe Webhook Handler Route Here ---
+# @app.route('/stripe-webhook', methods=['POST'])
+# def stripe_webhook():
+#     # ... implementation needed ...
+#     pass
 
 # --- Run the Flask development server ---
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     # Set debug=False when deploying to Render for production
-    # Use '0.0.0.0' to be accessible on your network if needed, default is '127.0.0.1'
-    app.run(debug=True, host='0.0.0.0', port=port) 
+    app.run(debug=True, host='0.0.0.0', port=port)
