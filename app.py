@@ -8,21 +8,12 @@ import json
 from datetime import timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from dotenv import load_dotenv
-import logging
 
 # Load environment variables
 load_dotenv()
 
 # Flask app setup
 app = Flask(__name__)
-app.logger.setLevel(logging.INFO)
-
-@app.errorhandler(Exception)
-def handle_exception(e):
-    app.logger.error(f"Unhandled exception: {e}", exc_info=True)
-    flash("An internal error occurred. Please try again later.", "error")
-    return redirect(url_for("mailer")), 500
-
 app.secret_key = os.environ.get('SECRET_KEY') or 'dev-fallback-secret'
 
 # Redis setup
@@ -82,19 +73,18 @@ def send_email_via_mailgun(recipient, subject, body, from_name, reply_to_email, 
     url = f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages"
     auth = ('api', MAILGUN_API_KEY)
     data = {
+    # Disable Mailgun tracking
+    data.update({
+        'o:tracking': 'false',
+        'o:tracking-clicks': 'false',
+        'o:tracking-opens': 'false'
+    })
         "from": f"{from_name} <sender@{MAILGUN_DOMAIN}>",
         "to": [recipient],
         "subject": subject,
         "text": body,
         "h:Reply-To": reply_to_email
     }
-    # Render HTML email template
-    html_body = render_template('email.html',
-        subject=subject,
-        body=body,
-        from_name=from_name,
-    )
-    data['html'] = html_body
     files = attachments or []
     try:
         resp = requests.post(url, auth=auth, data=data, files=files)
@@ -260,20 +250,6 @@ def stripe_webhook():
 
     return ("", 200)
 
-
-
-@app.route('/healthz')
-def healthz():
-    """Health check endpoint for Render."""
-    try:
-        if redis_client:
-            redis_client.ping()
-        else:
-            return ('', 503)
-    except Exception as e:
-        app.logger.error(f'Healthcheck Redis ping failed: {e}', exc_info=True)
-        return ('', 503)
-    return ('', 200)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
