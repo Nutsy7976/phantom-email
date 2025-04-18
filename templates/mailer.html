@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Compose Anonymous Email - Phantom</title>
 
-  <!-- Your global stylesheet -->
+  <!-- Global Stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
+    /* --- CSS Variables --- */
     :root {
       --bg-main:        #0d0d0d;
       --accent-green:   #00ff99;
@@ -21,11 +23,12 @@
       --panel-bg:         var(--bg-main);
       --field-bg:         #1a1a1a;
       --field-border:     var(--border-gray);
-      --muted-text:       #ffffff;
+      --muted-text:       #ffffff; /* Consider a slightly less bright color like #a0a0a0 for muted text */
       --focus-ring-color: var(--accent-blue);
       --hover-green:      #00cc88;
     }
 
+    /* --- Base Styles --- */
     body {
       margin: 0;
       background-color: var(--bg-main);
@@ -33,6 +36,7 @@
       font-family: 'Inter', system-ui, sans-serif;
     }
 
+    /* --- Header --- */
     header {
       background-color: var(--header-footer-bg);
       color: var(--accent-green);
@@ -49,6 +53,7 @@
       margin-right: 12px;
     }
 
+    /* --- Layout --- */
     .container {
       width: 90%;
       max-width: 1100px;
@@ -71,6 +76,7 @@
       box-shadow: 0 4px 15px rgba(0, 255, 255, 0.1);
     }
 
+    /* --- Left Info Box --- */
     .left-box h2 {
       margin-top: 0;
       color: var(--accent-blue);
@@ -96,6 +102,7 @@
       font-weight: bold;
     }
 
+    /* --- Form Box --- */
     .form-heading {
       text-align: center;
       color: var(--accent-blue);
@@ -137,16 +144,52 @@
 
     .form-box textarea {
       resize: vertical;
+      min-height: 100px; /* Added a min-height for better default appearance */
     }
 
+    /* Style the file input button for better consistency */
     .form-box input[type="file"]::file-selector-button {
-      background-color: #555;
+      background-color: #333; /* Slightly darker */
       color: #fff;
       border: none;
       padding: 8px 12px;
       border-radius: 4px;
       cursor: pointer;
       margin-right: 10px;
+      transition: background-color 0.2s ease;
+    }
+    .form-box input[type="file"]::file-selector-button:hover {
+       background-color: #444;
+    }
+
+    .form-box .field-note {
+      color: var(--muted-text);
+      font-size: 0.8em;
+      display: block;
+      margin-top: -0.75rem; /* Pull up slightly below the input */
+      margin-bottom: 1rem;
+    }
+
+    .form-box .free-trial-container {
+      margin-bottom: 1.5rem; /* Increased spacing */
+      display: flex; /* Align checkbox and label */
+      align-items: center;
+    }
+
+    .form-box .free-trial-container input[type="checkbox"] {
+      margin-right: 0.5rem;
+      accent-color: var(--accent-green); /* Style checkbox color */
+      width: auto; /* Override default width */
+      margin-bottom: 0; /* Reset margin */
+    }
+
+    .form-box .free-trial-highlight {
+      color: var(--accent-green);
+      font-weight: bold;
+    }
+
+    .form-box .captcha-container {
+       margin-bottom: 1.5rem; /* Spacing below captcha */
     }
 
     .form-box button[type="submit"] {
@@ -159,7 +202,7 @@
       font-size: 1.1rem;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 0 10px rgba(0,204,153,0.4);
+      box-shadow: 0 0 10px rgba(0, 204, 153, 0.4);
       transition: background-color 0.2s ease, transform 0.1s ease;
     }
 
@@ -172,23 +215,24 @@
       transform: translateY(0);
     }
 
+    /* --- Flash Messages --- */
     .flash-messages {
       list-style: none;
       padding: 0;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem; /* Increased spacing */
     }
 
     .flash-messages li {
       padding: 0.8rem 1.2rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem; /* Increased spacing */
       border-radius: 6px;
       font-weight: 500;
     }
 
     .flash-messages .error {
-      background-color: rgba(255, 0, 0, 0.2);
-      border: 1px solid #ff3333;
-      color: #ff3333;
+      background-color: rgba(255, 68, 68, 0.2); /* Slightly adjusted red */
+      border: 1px solid #ff4444;
+      color: #ff4444;
     }
 
     .flash-messages .success {
@@ -197,19 +241,26 @@
       color: var(--accent-green);
     }
 
+    /* --- Responsive Design --- */
     @media (max-width: 850px) {
-      .main-section { flex-direction: column; }
+      .main-section {
+        flex-direction: column;
+      }
+      .left-box, .form-box {
+         min-width: unset; /* Allow shrinking */
+      }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <img src="{{ url_for('static', filename='images/phantom_logo.png') }}" alt="Phantom Mask Logo">
+    <img src="{{ url_for('static', filename='images/phantom_logo.png') }}" alt="">
     Anonymous Email by Phantom
   </header>
 
   <section class="main-section container">
+
     <div class="left-box">
       <h2>Phantom Features</h2>
       <ul>
@@ -236,48 +287,61 @@
       {% endwith %}
 
       <form action="{{ url_for('start_payment') }}" method="post" enctype="multipart/form-data">
-        <!-- csrf_token() removed -->
+        <!-- No CSRF token needed if not using Flask-WTF sessions for this specifically -->
 
+        <!-- Sender Info -->
         <label for="from_name" class="field-label">Sender Name (Fictitious):</label>
         <input id="from_name" name="from_name" type="text" placeholder="e.g., Concerned Citizen" required>
 
         <label for="from_email" class="field-label">Sender Email (Reply‑To):</label>
         <input id="from_email" name="from_email" type="email" placeholder="e.g., info@secure.com" required>
-        <small style="color: var(--muted-text); font-size:0.8em; display:block; margin-bottom:1rem;">
-          This will be set as the Reply‑To address.
+        <small class="field-note">
+          This will be set as the Reply‑To address. Replies will go here.
         </small>
 
+        <!-- Recipient Info -->
         <label for="to_email" class="field-label">Recipient’s Email:</label>
         <input id="to_email" name="to_email" type="email" placeholder="Recipient’s email" required>
 
+        <!-- Message Content -->
         <label for="subject" class="field-label">Subject:</label>
         <input id="subject" name="subject" type="text" placeholder="Email Subject" required>
 
         <label for="message" class="field-label">Message:</label>
         <textarea id="message" name="message" rows="6" placeholder="Your anonymous message..." required></textarea>
 
+        <!-- Attachments -->
         <label for="file1" class="field-label">Optional Attachment 1:</label>
         <input id="file1" name="file1" type="file">
 
         <label for="file2" class="field-label">Optional Attachment 2:</label>
         <input id="file2" name="file2" type="file">
 
-        <!-- FREE TRIAL CHECKBOX -->
-        <div class="free-trial-container" style="margin-bottom:1rem;">
+        <!-- Options -->
+        <div class="free-trial-container">
           <input type="checkbox" id="free-trial-checkbox" name="free_trial" value="true">
           <label for="free-trial-checkbox">
-            Try 1 <span class="free-trial-highlight" style="color: var(--accent-green); font-weight:bold;">FREE</span> email
+            Try&nbsp;1&nbsp;<span class="free-trial-highlight">FREE</span>&nbsp;email (IP limited)
           </label>
         </div>
 
         <!-- CAPTCHA Widget -->
-        <div class="cf-turnstile" data-sitekey="{{ turnstile_sitekey }}"></div><br>
+        <div class="captcha-container">
+          <div class="cf-turnstile" data-sitekey="{{ turnstile_sitekey }}"></div>
+        </div>
 
+        <!-- Submission -->
         <button type="submit">Proceed to Send Email</button>
+
       </form>
     </div>
   </section>
 
   {% include 'footer.html' %}
+
+  <!-- Cloudflare Turnstile Script (Place usually before closing </body>) -->
+  <!-- <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script> -->
+  <!-- NOTE: Consider adding the Turnstile script if it's not loaded elsewhere globally -->
+
 </body>
 </html>
