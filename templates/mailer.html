@@ -43,7 +43,6 @@
       {% endwith %}
 
       <form action="{{ url_for('start_payment') }}" method="post" enctype="multipart/form-data">
-        {{ csrf_token() }}
 
         <label for="from_name" class="field-label">Sender Name (Fictitious):</label>
         <input id="from_name" name="from_name" type="text" placeholder="e.g., Concerned Citizen" required>
