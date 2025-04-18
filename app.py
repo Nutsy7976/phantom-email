@@ -42,6 +42,7 @@ else:
 
 
 def verify_turnstile(token, remoteip=None):
+    """Verify Cloudflare Turnstile token server-side."""
     secret = os.getenv("TURNSTILE_SECRET_KEY")
     if not secret or not token:
         return False
@@ -60,6 +61,7 @@ def verify_turnstile(token, remoteip=None):
 
 
 def allowed_file(filename):
+    """Return True if the file has an allowed extension."""
     ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -94,22 +96,27 @@ def send_email_via_mailgun(recipient, subject, body, from_name, reply_to_email, 
 def index():
     return render_template('index.html')
 
+
 @app.route('/mailer')
 def mailer():
-    sitekey = os.getenv("TURNSTILE_SITE_KEY")
+    sitekey = os.getenv("TURNSTILE_SITEKEY") or os.getenv("TURNSTILE_SITE_KEY")
     return render_template('mailer.html', turnstile_sitekey=sitekey)
+
 
 @app.route('/about')
 def about():
     return render_template('about.html')
 
+
 @app.route('/terms')
 def terms():
     return render_template('terms.html')
 
+
 @app.route('/privacy')
 def privacy():
     return render_template('privacy.html')
+
 
 @app.route('/thankyou')
 def thankyou():
@@ -121,12 +128,17 @@ def start_payment():
     if request.method != 'POST':
         return redirect(url_for('mailer'))
 
+    # Read Turnstile token and client IP
     token = request.form.get("cf-turnstile-response")
     client_ip = request.remote_addr
-    if not verify_turnstile(token, client_ip):
-        flash("CAPTCHA verification failed", "error")
-        return redirect(url_for("mailer"))
 
+    # Only enforce CAPTCHA if secret key is set
+    if os.getenv("TURNSTILE_SECRET_KEY"):
+        if not verify_turnstile(token, client_ip):
+            flash("CAPTCHA verification failed", "error")
+            return redirect(url_for("mailer"))
+
+    # Read form fields
     fn   = request.form.get('from_name')
     fe   = request.form.get('from_email')
     te   = request.form.get('to_email')
@@ -134,6 +146,7 @@ def start_payment():
     msg  = request.form.get('message')
     free = 'free_trial' in request.form
 
+    # Collect attachments
     attachments = []
     for key in ('file1', 'file2'):
         f = request.files.get(key)
@@ -143,6 +156,7 @@ def start_payment():
                 (f.filename, f.stream, f.mimetype)
             ))
 
+    # Free-trial branch
     if free:
         ip = client_ip or request.environ.get('HTTP_X_FORWARDED_FOR')
         if not ip:
@@ -162,15 +176,16 @@ def start_payment():
         flash('Send failed', 'error')
         return redirect(url_for('mailer'))
 
+    # Paid branch
     if not STRIPE_SECRET_KEY:
         flash('Payment unavailable', 'error')
         return redirect(url_for('mailer'))
 
     eid = str(uuid.uuid4())
     meta = {'redis_email_key': f"email:{eid}"}
-    data = {"to_email": te, "subject": subj, "message": msg, "from_name": fn, "from_email": fe}
+    payload = {"to_email": te, "subject": subj, "message": msg, "from_name": fn, "from_email": fe}
     if redis_client:
-        redis_client.setex(meta['redis_email_key'], timedelta(minutes=60), json.dumps(data))
+        redis_client.setex(meta['redis_email_key'], timedelta(minutes=60), json.dumps(payload))
 
     try:
         sess = stripe.checkout.Session.create(
@@ -199,18 +214,15 @@ def start_payment():
 
 @app.route('/stripe-webhook', methods=['POST'])
 def stripe_webhook():
-    payload = request.get_data(as_text=False)
+    payload = request.get_data()
     sig_header = request.headers.get('Stripe-Signature')
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
-    except ValueError:
-        print("Invalid payload")
-        abort(400)
-    except stripe.error.SignatureVerificationError:
-        print("Invalid signature")
+    except (ValueError, stripe.error.SignatureVerificationError) as e:
+        print(f"Webhook error: {e}")
         abort(400)
 
-    if event["type"] == "checkout.session.completed":
+    if event.get("type") == "checkout.session.completed":
         session = event["data"]["object"]
         key = session.get("metadata", {}).get("redis_email_key")
         if key and redis_client:
@@ -236,4 +248,4 @@ def stripe_webhook():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug_mode = os.environ.get('FLASK_DEBUG', 'true').lower() == 'true'
-    app.run(debug=debug_mode, host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)
