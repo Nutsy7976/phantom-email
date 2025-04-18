@@ -8,58 +8,55 @@
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
+  <div class="page-container">
+    <h1>Compose Your Anonymous Email</h1>
 
-  <h1>Compose Your Anonymous Email</h1>
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for category, msg in messages %}
+            <li class="{{ category }}">{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
 
-  <!-- Flash messages -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <ul class="flashes">
-      {% for category, msg in messages %}
-        <li class="{{ category }}">{{ msg }}</li>
-      {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
+    <form action="{{ url_for('start_payment') }}" method="post" enctype="multipart/form-data">
 
-  <form action="{{ url_for('start_payment') }}" method="post" enctype="multipart/form-data">
-    <label>From Name:
-      <input type="text" name="from_name" required>
-    </label><br>
+      <label for="from_name">From Name:</label><br>
+      <input id="from_name" type="text" name="from_name" required><br><br>
 
-    <label>Your Email (Reply‑To):
-      <input type="email" name="from_email" required>
-    </label><br>
+      <label for="from_email">Your Email (Reply‑To):</label><br>
+      <input id="from_email" type="email" name="from_email" required><br><br>
 
-    <label>Recipient’s Email:
-      <input type="email" name="to_email" required>
-    </label><br>
+      <label for="to_email">Recipient’s Email:</label><br>
+      <input id="to_email" type="email" name="to_email" required><br><br>
 
-    <label>Subject:
-      <input type="text" name="subject" required>
-    </label><br>
+      <label for="subject">Subject:</label><br>
+      <input id="subject" type="text" name="subject" required><br><br>
 
-    <label>Message:</label><br>
-    <textarea name="message" rows="6" required></textarea><br>
+      <label for="message">Message:</label><br>
+      <textarea id="message" name="message" rows="6" required></textarea><br><br>
 
-    <label>
-      <input type="checkbox" name="free_trial">
-      Use Free Trial (no payment)
-    </label><br>
+      <label>
+        <input type="checkbox" name="free_trial">
+        Use Free Trial (no payment)
+      </label><br><br>
 
-    <label>Attachment 1:
-      <input type="file" name="file1">
-    </label><br>
-    <label>Attachment 2:
-      <input type="file" name="file2">
-    </label><br>
+      <label for="file1">Attachment 1:</label>
+      <input id="file1" type="file" name="file1"><br><br>
 
-    <!-- Turnstile CAPTCHA -->
-    <div class="cf-turnstile" data-sitekey="{{ turnstile_sitekey }}"></div><br>
+      <label for="file2">Attachment 2:</label>
+      <input id="file2" type="file" name="file2"><br><br>
 
-    <button type="submit">Send Email</button>
-  </form>
+      <!-- Turnstile CAPTCHA -->
+      <div class="cf-turnstile" data-sitekey="{{ turnstile_sitekey }}"></div><br>
 
-  <p><a href="{{ url_for('index') }}">← Back to Home</a></p>
+      <button type="submit">Send Email</button>
+    </form>
+
+    <p><a href="{{ url_for('index') }}">← Back to Home</a></p>
+  </div>
 </body>
 </html>
