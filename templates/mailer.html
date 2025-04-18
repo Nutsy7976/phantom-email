@@ -1,34 +1,65 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compose Email - Phantom Anonymous Emailer</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Send Anonymous Email</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
-    <main>
-        <form action="/start-payment" enctype="multipart/form-data" method="post">
-            {{ csrf_token() }}
-            <label for="from_name">Sender Name:</label>
-            <input name="from_name" id="from_name" required type="text" maxlength="50"/>
-            <label for="from_email">Sender Email:</label>
-            <input name="from_email" id="from_email" required type="email" maxlength="100"/>
-            <label for="to_email">Recipient Email:</label>
-            <input name="to_email" id="to_email" required type="email" maxlength="100"/>
-            <label for="subject">Subject:</label>
-            <input name="subject" id="subject" required type="text" maxlength="100"/>
-            <label for="message">Message:</label>
-            <textarea name="message" id="message" required rows="7" maxlength="2000"></textarea>
-            <label for="file1">Attachment 1:</label>
-            <input name="file1" id="file1" type="file"/>
-            <label for="file2">Attachment 2:</label>
-            <input name="file2" id="file2" type="file"/>
-            <div class="cf-turnstile" data-sitekey="{{ turnstile_sitekey }}"></div>
-            <button type="submit">Send Email</button>
-        </form>
-    </main>
+
+  <h1>Compose Your Anonymous Email</h1>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class="flashes">
+      {% for category, msg in messages %}
+        <li class="{{ category }}">{{ msg }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <form action="{{ url_for('start_payment') }}" method="post" enctype="multipart/form-data">
+    <label>From Name:
+      <input type="text" name="from_name" required>
+    </label><br>
+
+    <label>Your Email (Reply‑To):
+      <input type="email" name="from_email" required>
+    </label><br>
+
+    <label>Recipient’s Email:
+      <input type="email" name="to_email" required>
+    </label><br>
+
+    <label>Subject:
+      <input type="text" name="subject" required>
+    </label><br>
+
+    <label>Message:</label><br>
+    <textarea name="message" rows="6" required></textarea><br>
+
+    <label>
+      <input type="checkbox" name="free_trial">
+      Use Free Trial (no payment)
+    </label><br>
+
+    <label>Attachment 1:
+      <input type="file" name="file1">
+    </label><br>
+    <label>Attachment 2:
+      <input type="file" name="file2">
+    </label><br>
+
+    <!-- Turnstile CAPTCHA -->
+    <div class="cf-turnstile" data-sitekey="{{ turnstile_sitekey }}"></div><br>
+
+    <button type="submit">Send Email</button>
+  </form>
+
+  <p><a href="{{ url_for('index') }}">← Back to Home</a></p>
 </body>
 </html>
