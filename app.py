@@ -42,7 +42,6 @@ else:
 
 
 def verify_turnstile(token, remoteip=None):
-    """Verify Cloudflare Turnstile token server-side."""
     secret = os.getenv("TURNSTILE_SECRET_KEY")
     if not secret or not token:
         return False
@@ -61,7 +60,6 @@ def verify_turnstile(token, remoteip=None):
 
 
 def allowed_file(filename):
-    """Return True if the file has an allowed extension."""
     ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -73,17 +71,14 @@ def send_email_via_mailgun(recipient, subject, body, from_name, reply_to_email, 
     url = f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages"
     auth = ('api', MAILGUN_API_KEY)
     data = {
-    # Disable Mailgun tracking
-    data.update({
-        'o:tracking': 'false',
-        'o:tracking-clicks': 'false',
-        'o:tracking-opens': 'false'
-    })
         "from": f"{from_name} <sender@{MAILGUN_DOMAIN}>",
         "to": [recipient],
         "subject": subject,
         "text": body,
-        "h:Reply-To": reply_to_email
+        "h:Reply-To": reply_to_email,
+        "o:tracking": 'false',
+        "o:tracking-clicks": 'false',
+        "o:tracking-opens": 'false'
     }
     files = attachments or []
     try:
@@ -95,15 +90,12 @@ def send_email_via_mailgun(recipient, subject, body, from_name, reply_to_email, 
         return False
 
 
-# --- Basic page routes ---
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/mailer')
 def mailer():
-    # Pass Turnstile sitekey into template
     sitekey = os.getenv("TURNSTILE_SITE_KEY")
     return render_template('mailer.html', turnstile_sitekey=sitekey)
 
@@ -124,21 +116,17 @@ def thankyou():
     return render_template('thankyou.html')
 
 
-# --- Payment and email submission ---
-
 @app.route('/start-payment', methods=['POST'])
 def start_payment():
     if request.method != 'POST':
         return redirect(url_for('mailer'))
 
-    # 1. CAPTCHA validation
     token = request.form.get("cf-turnstile-response")
     client_ip = request.remote_addr
     if not verify_turnstile(token, client_ip):
         flash("CAPTCHA verification failed", "error")
         return redirect(url_for("mailer"))
 
-    # 2. Read form fields
     fn   = request.form.get('from_name')
     fe   = request.form.get('from_email')
     te   = request.form.get('to_email')
@@ -146,7 +134,6 @@ def start_payment():
     msg  = request.form.get('message')
     free = 'free_trial' in request.form
 
-    # 3. Collect attachments
     attachments = []
     for key in ('file1', 'file2'):
         f = request.files.get(key)
@@ -156,7 +143,6 @@ def start_payment():
                 (f.filename, f.stream, f.mimetype)
             ))
 
-    # 4. Free‑trial branch
     if free:
         ip = client_ip or request.environ.get('HTTP_X_FORWARDED_FOR')
         if not ip:
@@ -176,7 +162,6 @@ def start_payment():
         flash('Send failed', 'error')
         return redirect(url_for('mailer'))
 
-    # 5. Paid branch
     if not STRIPE_SECRET_KEY:
         flash('Payment unavailable', 'error')
         return redirect(url_for('mailer'))
@@ -212,8 +197,6 @@ def start_payment():
         return redirect(url_for('mailer'))
 
 
-# --- Stripe webhook handler ---
-
 @app.route('/stripe-webhook', methods=['POST'])
 def stripe_webhook():
     payload = request.get_data(as_text=False)
@@ -240,8 +223,7 @@ def stripe_webhook():
                         email_data["subject"],
                         email_data["message"],
                         email_data["from_name"],
-                        email_data["from_email"],
-                        # You’ll need to store attachments in metadata if you want to resend them
+                        email_data["from_email"]
                     )
                     redis_client.delete(key)
                 except Exception as e:
