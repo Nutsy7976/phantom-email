@@ -8,11 +8,204 @@
   <!-- Your global stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-main:        #0d0d0d;
+      --accent-green:   #00ff99;
+      --accent-blue:    #00ccff;
+      --text-main:      #e0e0e0;
+      --border-gray:    #1a1a1a;
+
+      --header-footer-bg: var(--bg-main);
+      --panel-bg:         var(--bg-main);
+      --field-bg:         #1a1a1a;
+      --field-border:     var(--border-gray);
+      --muted-text:       #ffffff;
+      --focus-ring-color: var(--accent-blue);
+      --hover-green:      #00cc88;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    header {
+      background-color: var(--header-footer-bg);
+      color: var(--accent-green);
+      text-align: center;
+      padding: 1.5rem 1rem;
+      font-size: 1.8rem;
+      font-weight: 700;
+      border-bottom: 1px solid var(--field-border);
+    }
+
+    header img {
+      height: 40px;
+      vertical-align: middle;
+      margin-right: 12px;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1100px;
+      margin: 2rem auto;
+    }
+
+    .main-section {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .left-box, .form-box {
+      flex: 1;
+      min-width: 300px;
+      background-color: var(--panel-bg);
+      padding: 1.5rem 2rem;
+      border-radius: 10px;
+      border: 1px solid var(--field-border);
+      box-shadow: 0 4px 15px rgba(0, 255, 255, 0.1);
+    }
+
+    .left-box h2 {
+      margin-top: 0;
+      color: var(--accent-blue);
+      font-size: 1.5rem;
+      border-bottom: 1px solid var(--field-border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .left-box ul {
+      list-style: none;
+      padding-left: 0;
+      line-height: 1.8;
+    }
+
+    .left-box li {
+      margin-bottom: 0.75rem;
+    }
+
+    .left-box li::before {
+      content: "✓ ";
+      color: var(--accent-green);
+      font-weight: bold;
+    }
+
+    .form-heading {
+      text-align: center;
+      color: var(--accent-blue);
+      font-size: 1.9rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      text-shadow: 0 0 6px #00ffff88;
+    }
+
+    .form-box label.field-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9em;
+      color: var(--muted-text);
+    }
+
+    .form-box input[type="text"],
+    .form-box input[type="email"],
+    .form-box textarea,
+    .form-box input[type="file"] {
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 1.25rem;
+      border: 1px solid var(--field-border);
+      border-radius: 6px;
+      background-color: var(--field-bg);
+      color: var(--text-main);
+      box-sizing: border-box;
+      font-size: 1rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-box input:focus,
+    .form-box textarea:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 8px var(--focus-ring-color);
+    }
+
+    .form-box textarea {
+      resize: vertical;
+    }
+
+    .form-box input[type="file"]::file-selector-button {
+      background-color: #555;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+
+    .form-box button[type="submit"] {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--accent-green);
+      color: var(--bg-main);
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0,204,153,0.4);
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .form-box button[type="submit"]:hover {
+      background-color: var(--hover-green);
+      transform: translateY(-2px);
+    }
+
+    .form-box button[type="submit"]:active {
+      transform: translateY(0);
+    }
+
+    .flash-messages {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 1rem;
+    }
+
+    .flash-messages li {
+      padding: 0.8rem 1.2rem;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+
+    .flash-messages .error {
+      background-color: rgba(255, 0, 0, 0.2);
+      border: 1px solid #ff3333;
+      color: #ff3333;
+    }
+
+    .flash-messages .success {
+      background-color: rgba(0, 204, 153, 0.2);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    @media (max-width: 850px) {
+      .main-section { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
 
   <header>
-    <img src="{{ url_for('static', filename='images/phantom_logo.png') }}" alt="">
+    <img src="{{ url_for('static', filename='images/phantom_logo.png') }}" alt="Phantom Mask Logo">
     Anonymous Email by Phantom
   </header>
 
@@ -43,6 +236,7 @@
       {% endwith %}
 
       <form action="{{ url_for('start_payment') }}" method="post" enctype="multipart/form-data">
+        <!-- csrf_token() removed -->
 
         <label for="from_name" class="field-label">Sender Name (Fictitious):</label>
         <input id="from_name" name="from_name" type="text" placeholder="e.g., Concerned Citizen" required>
@@ -68,21 +262,18 @@
         <label for="file2" class="field-label">Optional Attachment 2:</label>
         <input id="file2" name="file2" type="file">
 
-        <!-- ==== FREE TRIAL CHECKBOX ==== -->
+        <!-- FREE TRIAL CHECKBOX -->
         <div class="free-trial-container" style="margin-bottom:1rem;">
           <input type="checkbox" id="free-trial-checkbox" name="free_trial" value="true">
           <label for="free-trial-checkbox">
             Try 1 <span class="free-trial-highlight" style="color: var(--accent-green); font-weight:bold;">FREE</span> email
           </label>
         </div>
-        <!-- ==== END FREE TRIAL CHECKBOX ==== -->
 
         <!-- CAPTCHA Widget -->
         <div class="cf-turnstile" data-sitekey="{{ turnstile_sitekey }}"></div><br>
 
-        <button type="submit">
-          <span>Pay $3.00 USD &amp; Send</span>
-        </button>
+        <button type="submit">Proceed to Send Email</button>
       </form>
     </div>
   </section>
