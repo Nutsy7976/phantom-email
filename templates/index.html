@@ -1,108 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phantom Anonymous Emailer</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Phantom Anonymous Emailer - Send Emails Anonymously</title>
+
+    <!-- Your global stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-          integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Use variables consistent with mailer.html if desired */
+        :root {
+          --bg-main:        #0d0d0d;
+          --accent-green:   #00ff99;
+          --accent-blue:    #00ccff;
+          --text-main:      #e0e0e0;
+          --border-gray:    #1a1a1a;
+          --hover-green:      #00cc88;
+        }
+
+        /* Basic body styling if not in global css */
+        body {
+          margin: 0;
+          background-color: var(--bg-main);
+          color: var(--text-main);
+          font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .container {
+          width: 90%;
+          max-width: 1100px; /* Or your preferred max width */
+          margin-left: auto;
+          margin-right: auto;
+          padding: 1rem; /* Add some padding */
+        }
+
+        .hero-section {
+          text-align: center; /* Center align title and button */
+          padding: 4rem 0; /* Add vertical padding */
+          min-height: 60vh; /* Ensure section takes some height */
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .hero-section h1 {
+          font-size: 2.8rem; /* Adjust size as needed */
+          color: var(--accent-blue);
+          margin-bottom: 1.5rem; /* Space below title */
+          font-weight: 700;
+          text-shadow: 0 0 8px rgba(0, 204, 255, 0.5);
+        }
+
+        /* Styles for the hero logo */
+        #hero-logo {
+          display: block; /* Needed for margin: auto horizontal centering */
+          margin: 1.5rem auto 2.5rem auto; /* Top margin, Auto L/R margin, Bottom margin */
+          
+          /* --- Default Size & Scalability --- */
+          max-width: 180px; /* Default max width for smaller screens */
+          width: 50%; /* Shrink relative to container width, but max out */
+          height: auto; /* Maintain aspect ratio */
+          transition: max-width 0.3s ease; /* Smooth transition if needed */
+        }
+
+        /* --- Media Query for Larger Size on Desktops --- */
+        /* Adjust 992px breakpoint if needed */
+        @media (min-width: 992px) {
+          #hero-logo {
+            /* Set desired larger size for PCs (approx 3x typical logo ~150/160px) */
+            max-width: 480px;
+          }
+          .hero-section h1 {
+             font-size: 3.5rem; /* Slightly larger title on desktop */
+          }
+        }
+
+        /* Example button styling */
+        .cta-button {
+          display: inline-block;
+          padding: 12px 30px;
+          background-color: var(--accent-green);
+          color: var(--bg-main);
+          border: none;
+          border-radius: 6px;
+          font-size: 1.1rem;
+          font-weight: bold;
+          cursor: pointer;
+          text-decoration: none;
+          transition: background-color 0.2s ease, transform 0.1s ease;
+          margin-top: 1rem; /* Space above button */
+        }
+
+        .cta-button:hover {
+          background-color: var(--hover-green);
+          transform: translateY(-2px);
+        }
+
+        /* Placeholder for header/footer if not using includes */
+        header, footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #111; /* Example */
+            border-bottom: 1px solid var(--border-gray);
+        }
+        footer {
+            border-top: 1px solid var(--border-gray);
+            border-bottom: none;
+            margin-top: 3rem;
+            font-size: 0.9em;
+            color: var(--muted-text, #a0a0a0);
+        }
+
+
+    </style>
 </head>
 <body>
 
-    <!-- Global Header (Index Style) -->
-    <header class="global-header">
-        <div class="header-container">
-            <div class="logo-container">
-                <div class="logo-placeholder"></div>
-            </div>
-            <div class="title-container">
-                <h1>Phantom Anonymous Emailer</h1>
-            </div>
-        </div>
+    <!-- Use include or add header content here -->
+    <header>
+        <!-- Example: Maybe just site name or leave empty if header include exists -->
+        <!-- If using header.html include: {% include 'header.html' %} -->
     </header>
 
-    <main>
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="index-hero-container">
-                <h1>Send Emails Without Revealing Your Identity</h1>
-                <p>Welcome to Anonymous Emailer, the secure and straightforward way to send one-off emails while protecting your privacy. Your real email address stays hidden. Perfect for situations where anonymity is crucial.</p>
-                <!-- Fixed button: now navigates to /mailer via url_for -->
-                <button class="button"
-                        onclick="window.location.href='{{ url_for('mailer') }}'">
-                    Send Your Anonymous Email Now
-                </button>
-            </div>
-        </section>
+    <section class="hero-section">
+        <div class="container">
 
-        <!-- Key Features Section -->
-        <section class="features">
-            <div class="page-container">
-                <h2>Why Choose Anonymous Emailer?</h2>
-                <div class="columns-container">
-                    <div class="column">
-                        <i class="fas fa-user-secret"></i>
-                        <h3>True Anonymity</h3>
-                        <p>Your real email and IP address are never disclosed to the recipient. We act as the intermediary.</p>
-                    </div>
-                    <div class="column">
-                        <i class="fas fa-lock"></i>
-                        <h3>Secure & Encrypted</h3>
-                        <p>HTTPS connections, content scanning, and security best practices protect your communication.</p>
-                    </div>
-                    <div class="column">
-                        <i class="fab fa-stripe-s"></i>
-                        <h3>Stripe Payments</h3>
-                        <p>Reliable and globally trusted payment processing. We don't handle your card details directly.</p>
-                    </div>
-                    <div class="column">
-                        <i class="fas fa-paperclip"></i>
-                        <h3>File Attachments</h3>
-                        <p>Easily attach documents, images, etc. (PDF, DOCX, JPG, PNG and more, up to 5MB total).</p>
-                    </div>
-                    <div class="column">
-                        <i class="fas fa-bolt"></i>
-                        <h3>Fast & Simple</h3>
-                        <p>No account creation needed. Compose, pay securely, and your email is on its way within moments.</p>
-                    </div>
-                    <div class="column">
-                        <i class="fas fa-eye-slash"></i>
-                        <h3>Privacy First</h3>
-                        <p>Temporary data storage only. Content is deleted post-send. No long-term logs kept.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+            <h1>Phantom Anonymous Emailer</h1>
 
-        <!-- Use Cases Section -->
-        <section class="use-cases">
-            <div class="page-container">
-                <h2>When is Anonymous Email Useful?</h2>
-                <ul>
-                    <li>Contacting websites or sellers without exposing your personal email to potential spam.</li>
-                    <li>Providing sensitive feedback or information where sender privacy is paramount.</li>
-                    <li>Making initial contact in online marketplaces before sharing primary contact details.</li>
-                    <li>Whistleblowing or reporting issues where anonymity is desired.</li>
-                    <li>Any legitimate situation requiring you to protect your identity during email communication.</li>
-                </ul>
-                <p class="disclaimer">This service is intended for lawful purposes only. Use must comply with our <a href="{{ url_for('terms') }}">Terms of Service</a>.</p>
-            </div>
-        </section>
-    </main>
+            <!-- The Image -->
+            <img id="hero-logo" src="{{ url_for('static', filename='images/phantom_logo.png') }}" alt="Phantom Mailer Logo">
 
-    <!-- Standard Footer Structure -->
-    <footer>
-        <div class="page-container">
-            <nav>
-                <a href="{{ url_for('about') }}">About Us</a>
-                <a href="{{ url_for('terms') }}">Terms of Service</a>
-                <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-            </nav>
-            <p>&copy; <script>document.write(new Date().getFullYear())</script> Phantom Anonymous Emailer. All Rights Reserved.</p>
+            <!-- Optional: Add a brief description -->
+            <p style="font-size: 1.1rem; max-width: 600px; margin: 0 auto 1.5rem auto; line-height: 1.6;">
+                Send emails securely and anonymously. No accounts, minimal logs.
+            </p>
+
+            <!-- Call to action button -->
+            <a href="{{ url_for('mailer') }}" class="cta-button">Compose Email Now</a>
+
         </div>
-    </footer>
+    </section>
+
+    <!-- Use include or add footer content here -->
+     <footer>
+        <!-- If using footer.html include: {% include 'footer.html' %} -->
+        <!-- Example content if not using include -->
+         <p>
+            <a href="{{ url_for('about') }}">About</a> ·
+            <a href="{{ url_for('terms') }}">Terms</a> ·
+            <a href="{{ url_for('privacy') }}">Privacy</a> ·
+            <a href="{{ url_for('index') }}">Home</a>
+         </p>
+         <p>&copy; 2025 Phantom Anonymous Emailer. All Rights Reserved.</p>
+     </footer>
 
 </body>
 </html>
