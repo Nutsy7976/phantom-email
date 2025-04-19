@@ -23,9 +23,10 @@
       --panel-bg:         var(--bg-main);
       --field-bg:         #1a1a1a;
       --field-border:     var(--border-gray);
-      --muted-text:       #ffffff; /* Consider a slightly less bright color like #a0a0a0 for muted text */
+      --muted-text:       #a0a0a0; /* Slightly softer muted text */
       --focus-ring-color: var(--accent-blue);
       --hover-green:      #00cc88;
+      --warning-red:      #ff4444;
     }
 
     /* --- Base Styles --- */
@@ -144,12 +145,11 @@
 
     .form-box textarea {
       resize: vertical;
-      min-height: 100px; /* Added a min-height for better default appearance */
+      min-height: 100px;
     }
 
-    /* Style the file input button for better consistency */
     .form-box input[type="file"]::file-selector-button {
-      background-color: #333; /* Slightly darker */
+      background-color: #333;
       color: #fff;
       border: none;
       padding: 8px 12px;
@@ -166,21 +166,40 @@
       color: var(--muted-text);
       font-size: 0.8em;
       display: block;
-      margin-top: -0.75rem; /* Pull up slightly below the input */
+      margin-top: -0.75rem;
       margin-bottom: 1rem;
     }
 
+    /* --- Attachments Section --- */
+    .attachments-section {
+        margin-bottom: 1.5rem; /* Space before free trial/captcha */
+    }
+
+    /* --- Attachment Warning --- */
+    #attachment-warning {
+        color: var(--warning-red);
+        font-weight: bold;
+        font-size: 0.9em;
+        margin-top: -0.5rem; /* Display below last file input */
+        margin-bottom: 1rem;
+        display: none; /* Hidden by default */
+        border: 1px solid var(--warning-red);
+        background-color: rgba(255, 68, 68, 0.1);
+        padding: 8px 12px;
+        border-radius: 4px;
+    }
+
     .form-box .free-trial-container {
-      margin-bottom: 1.5rem; /* Increased spacing */
-      display: flex; /* Align checkbox and label */
+      margin-bottom: 1.5rem;
+      display: flex;
       align-items: center;
     }
 
     .form-box .free-trial-container input[type="checkbox"] {
       margin-right: 0.5rem;
-      accent-color: var(--accent-green); /* Style checkbox color */
-      width: auto; /* Override default width */
-      margin-bottom: 0; /* Reset margin */
+      accent-color: var(--accent-green);
+      width: auto;
+      margin-bottom: 0;
     }
 
     .form-box .free-trial-highlight {
@@ -189,7 +208,7 @@
     }
 
     .form-box .captcha-container {
-       margin-bottom: 1.5rem; /* Spacing below captcha */
+       margin-bottom: 1.5rem;
     }
 
     .form-box button[type="submit"] {
@@ -203,7 +222,7 @@
       font-weight: bold;
       cursor: pointer;
       box-shadow: 0 0 10px rgba(0, 204, 153, 0.4);
-      transition: background-color 0.2s ease, transform 0.1s ease;
+      transition: background-color 0.2s ease, transform 0.1s ease, opacity 0.2s ease; /* Added opacity transition */
     }
 
     .form-box button[type="submit"]:hover {
@@ -215,24 +234,35 @@
       transform: translateY(0);
     }
 
+    /* Style for disabled button */
+    .form-box button[type="submit"]:disabled {
+        background-color: #555; /* Darker grey */
+        color: #999; /* Lighter grey text */
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none; /* Disable hover/active effects */
+        box-shadow: none;
+    }
+
+
     /* --- Flash Messages --- */
     .flash-messages {
       list-style: none;
       padding: 0;
-      margin-bottom: 1.5rem; /* Increased spacing */
+      margin-bottom: 1.5rem;
     }
 
     .flash-messages li {
       padding: 0.8rem 1.2rem;
-      margin-bottom: 0.75rem; /* Increased spacing */
+      margin-bottom: 0.75rem;
       border-radius: 6px;
       font-weight: 500;
     }
 
     .flash-messages .error {
-      background-color: rgba(255, 68, 68, 0.2); /* Slightly adjusted red */
-      border: 1px solid #ff4444;
-      color: #ff4444;
+      background-color: rgba(255, 68, 68, 0.2);
+      border: 1px solid var(--warning-red);
+      color: var(--warning-red);
     }
 
     .flash-messages .success {
@@ -247,7 +277,7 @@
         flex-direction: column;
       }
       .left-box, .form-box {
-         min-width: unset; /* Allow shrinking */
+         min-width: unset;
       }
     }
   </style>
@@ -255,7 +285,7 @@
 <body>
 
   <header>
-    <img src="{{ url_for('static', filename='images/phantom_logo.png') }}" alt="">
+    <img src="{{ url_for('static', filename='images/phantom_logo.png') }}" alt="Phantom Logo">
     Anonymous Email by Phantom
   </header>
 
@@ -270,6 +300,7 @@
         <li>Customizable Reply‑To address</li>
         <li>Encrypted connection (TLS)</li>
         <li>Designed for enhanced anonymity</li>
+        <li>**NEW:** Up to 15MB total attachments</li>
       </ul>
     </div>
 
@@ -311,11 +342,16 @@
         <textarea id="message" name="message" rows="6" placeholder="Your anonymous message..." required></textarea>
 
         <!-- Attachments -->
-        <label for="file1" class="field-label">Optional Attachment 1:</label>
-        <input id="file1" name="file1" type="file">
+        <div class="attachments-section">
+            <label for="file1" class="field-label">Optional Attachment 1:</label>
+            <input id="file1" name="file1" type="file">
 
-        <label for="file2" class="field-label">Optional Attachment 2:</label>
-        <input id="file2" name="file2" type="file">
+            <label for="file2" class="field-label">Optional Attachment 2:</label>
+            <input id="file2" name="file2" type="file">
+
+            <!-- Attachment Size Warning Area -->
+            <div id="attachment-warning"></div>
+        </div>
 
         <!-- Options -->
         <div class="free-trial-container">
@@ -327,11 +363,12 @@
 
         <!-- CAPTCHA Widget -->
         <div class="captcha-container">
+          <!-- MODIFIED LINE: Reverted to Jinja2 variable -->
           <div class="cf-turnstile" data-sitekey="{{ turnstile_sitekey }}"></div>
         </div>
 
         <!-- Submission -->
-        <button type="submit">Proceed to Send Email</button>
+        <button type="submit" id="submit-button">Proceed to Send Email</button>
 
       </form>
     </div>
@@ -339,9 +376,61 @@
 
   {% include 'footer.html' %}
 
-  <!-- Cloudflare Turnstile Script (Place usually before closing </body>) -->
-  <!-- <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script> -->
-  <!-- NOTE: Consider adding the Turnstile script if it's not loaded elsewhere globally -->
+  <!-- Cloudflare Turnstile Script -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <!-- Ensure this is loaded -->
+
+  <!-- Custom JavaScript for Attachment Size Check -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Configuration
+      const MAX_TOTAL_SIZE_BYTES = 15 * 1024 * 1024; // 15 MB limit
+      const MAX_TOTAL_SIZE_MB = MAX_TOTAL_SIZE_BYTES / (1024 * 1024);
+
+      // Get DOM elements
+      const file1Input = document.getElementById('file1');
+      const file2Input = document.getElementById('file2');
+      const warningElement = document.getElementById('attachment-warning');
+      const submitButton = document.getElementById('submit-button');
+
+      function checkAttachmentSize() {
+        let totalSize = 0;
+        let file1Size = 0;
+        let file2Size = 0;
+
+        // Get size of file 1 if selected
+        if (file1Input.files && file1Input.files.length > 0) {
+          file1Size = file1Input.files[0].size;
+          totalSize += file1Size;
+        }
+
+        // Get size of file 2 if selected
+        if (file2Input.files && file2Input.files.length > 0) {
+          file2Size = file2Input.files[0].size;
+          totalSize += file2Size;
+        }
+
+        // Check if total size exceeds the limit
+        if (totalSize > MAX_TOTAL_SIZE_BYTES) {
+          const currentSizeMB = (totalSize / (1024 * 1024)).toFixed(1);
+          warningElement.textContent = `Warning: Total attachment size (${currentSizeMB} MB) exceeds the limit of ${MAX_TOTAL_SIZE_MB} MB. Please remove or replace files.`;
+          warningElement.style.display = 'block';
+          submitButton.disabled = true; // Disable submission
+        } else {
+          warningElement.textContent = ''; // Clear warning
+          warningElement.style.display = 'none'; // Hide warning area
+          submitButton.disabled = false; // Enable submission
+        }
+      }
+
+      // Add event listeners to both file inputs
+      file1Input.addEventListener('change', checkAttachmentSize);
+      file2Input.addEventListener('change', checkAttachmentSize);
+
+      // Initial check in case of browser auto-fill (less common now)
+      checkAttachmentSize();
+    });
+  </script>
 
 </body>
 </html>
