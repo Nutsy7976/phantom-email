@@ -324,6 +324,8 @@ def start_payment():
              return redirect(url_for('mailer'))
 
         app.logger.info("Redis client appears available. Entering try block for Redis check.") # <<< LOG 6
+
+        # --- START: RESTORED TRY/EXCEPT BLOCK ---
         try:
             ip_hash = hashlib.sha256(ip_for_limit.encode()).hexdigest()
             redis_key = f"free_trial_ip:{ip_hash}"
@@ -358,14 +360,16 @@ def start_payment():
                 return redirect(url_for('mailer'))
 
         except redis.RedisError as e:
-             # This is where the error *should* be caught
+             # This is where the error *is now* caught again
              app.logger.error(f"Redis error during free trial check: {e}", exc_info=True) # <<< LOG 12 (TARGET)
              flash('Error checking free trial status. Please try again.', 'error')
              return redirect(url_for('mailer'))
         except Exception as e:
+            # Catching other potential errors within the try block
             app.logger.error(f"Unexpected error during free trial processing: {e}", exc_info=True) # <<< LOG 13
             flash('An unexpected error occurred. Please try again.', 'error')
             return redirect(url_for('mailer'))
+        # --- END: RESTORED TRY/EXCEPT BLOCK ---
 
 
     # 4. Paid branch
